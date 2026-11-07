@@ -1,0 +1,8 @@
+MERUNO Update 32 — Phase 4D Diagnostic Master Data
+
+Adds protected Clinic Manager/System Admin APIs for laboratory tests and typed components, radiology procedures, and X-ray/ultrasound resources. Uses existing Phase 2C Prisma models and existing CLINIC_MASTER_DATA_MANAGE permission. Includes strict Zod validation, EGP price handling, soft deactivation, atomic AuditLog writes, historical order price snapshot preservation, and protection against deactivating resources used by scheduled/in-progress exams.
+
+No schema changes, migration, seed changes, Prisma generation, dependencies, package scripts, or environment changes.
+
+New tests: 26 unit validation tests and 2 E2E authorization tests.
+Expected overall suite after applying: 157 unit tests and 26 E2E tests.

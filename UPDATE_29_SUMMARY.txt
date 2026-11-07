@@ -1,0 +1,9 @@
+MERUNO Update 29 — Phase 4B1: Clinic Working Hours & Local Time
+
+Adds ClinicWeeklySchedule and ClinicScheduleException as single-branch clinic master data.
+Adds PostgreSQL checks and GiST exclusion constraints for non-overlapping active hours/exceptions.
+Adds the Africa/Cairo local-time conversion helper.
+Retains DoctorWeeklySchedule/DoctorScheduleException as already modeled; does not invent or seed doctor shifts or clinic hours.
+Migration is additive (expected fourth migration), inserts no data, and does not change existing appointments or schedules.
+No new dependency, no .env changes, no seed run.
+Expected validation totals: 98 unit tests, 22 E2E tests, plus typecheck/lint/build.

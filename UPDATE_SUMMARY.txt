@@ -1,0 +1,18 @@
+MERUNO Update 05 — Step 9 dependency compatibility fix
+
+Purpose
+- Fix the npm install failure caused by a known npm 10 Arborist peer-resolution bug with a mismatched Vitest 4.1.x optional-peer set.
+- Pin Vitest to 4.1.11, whose optional peers align at 4.1.11.
+- Pin @playwright/test to stable 1.64.1 so the local playwright package and playwright-core stay on the same published stable release.
+- Add `npm run test:e2e:install` so Chromium is installed through the project's local Playwright CLI instead of npx resolving an unrelated package.
+
+Files in this ZIP
+- package.json (full replacement; based on Update 04 package.json, with only the two exact version pins and one install script added)
+- docs/testing.md (browser install instruction updated)
+- README.md (browser install instruction and dependency setup note updated)
+- UPDATE_INSTRUCTIONS.md
+
+Important
+- No package-lock.json is included. It must be generated on the user's machine by npm install after applying this patch.
+- Do not delete node_modules or package-lock.json.
+- Do not modify .env, Prisma schema, or database data.

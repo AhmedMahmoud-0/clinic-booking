@@ -1,0 +1,10 @@
+MERUNO UPDATE 24 — PHASE 3G-A
+Patient Sign-up, Email Verification, and Password Recovery
+
+Adds verified patient sign-in registration, email verification, password recovery, and authenticated password changes.
+
+Public registration creates only a Better Auth identity and credential account. It does not create a clinic Patient, Employee, PatientAccount, EmployeeAccount, employee role, or medical record. A verified user must still be linked by authorized clinic staff through the Phase 3D two-identifier identity-verification flow before any patient record access is possible.
+
+Production sign-up remains disabled until the Resend API key and verified sender address are configured. Local development defaults to a console email transport. Email change and employee invitations are deferred to Phase 3G-B; patient delegation management is Phase 3G-C.
+
+No Prisma schema change, migration, seed, package dependency, or package script change is included.

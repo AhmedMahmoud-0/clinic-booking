@@ -1,0 +1,6 @@
+MERUNO Update 10 — Phase 2D Billing & Operations
+
+Adds 12 Prisma models: Invoice, InvoiceItem, Payment, DiscountApproval, Refund, RefundItem, Complaint, ComplaintEvent, IncidentReport, Attachment, Notification, AuditLog.
+Extends inverses on Employee, Patient, Appointment, Encounter, ServiceCatalog, LabOrderItem, LabResult, RadiologyOrderItem, RadiologyReport.
+
+Schema-only. No migration, seed, database write, dependency change, or authentication implementation.

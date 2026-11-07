@@ -1,0 +1,7 @@
+MERUNO Update 11 — Phase 2E
+
+- Adds an offline initial-migration preview script based on Prisma 7 migrate diff from an empty schema to the current schema.
+- Appends database-level integrity checks and GiST exclusion constraints to the generated migration.
+- Adds idempotent synthetic SQL seed for seven specialties, eight doctors, service catalog, lab tests/components, demo diagnosis labels, X-ray/ultrasound procedures and two resources.
+- Adds npm scripts for migration preview, status, and seed execution.
+- Does not add dependencies, replace schema.prisma, apply migrations, or write to PostgreSQL.

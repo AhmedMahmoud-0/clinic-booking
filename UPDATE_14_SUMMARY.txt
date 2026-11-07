@@ -1,0 +1,10 @@
+MERUNO Update 14 — Phase 3A Authentication Foundation
+
+- Adds Better Auth 1.7.18 and @better-auth/prisma-adapter 1.7.18.
+- Defines Better Auth User/Session/Account/Verification models.
+- Adds explicit EmployeeAccount and PatientAccount links.
+- Adds employee role assignment storage for the nine approved staff roles.
+- Adds scoped patient delegation grants and permission rows.
+- Encodes the confirmed subject/grantee PatientRelationship direction in the composite FK.
+- Does not enable auth routes or public signup yet.
+- Requires merging the Prisma fragment; it is not a standalone schema replacement.

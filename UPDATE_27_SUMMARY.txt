@@ -1,0 +1,13 @@
+MERUNO Update 27 — Phase 3G-C: Guardian and Adult Patient Delegation Management
+
+Adds a dedicated patient.delegation.manage permission for Reception and System Admin only.
+Adds protected staff grant list/create/reissue/update/revoke operations and patient incoming/outgoing list, adult approve/reject, and subject revocation operations.
+Uses the existing PatientAccessGrant, PatientAccessGrantPermission, PatientRelationship, PatientAccount, and AuditLog models.
+Minor grants activate only with staff-verified legal guardianship. Adult grants remain pending until the active, verified subject patient approves. Adult scope/expiry changes reset approval.
+All new grants have finite expiry: future and no more than 365 days.
+Existing Phase 3E exact-scope record access checks remain authoritative.
+
+No Prisma schema/migration/client generation, seed, database reset, dependency, package script, or environment change.
+
+Expected local tests: 86 unit tests across 11 files and 22 E2E tests, from the confirmed Update 26 baseline of 64 unit and 17 E2E.
+Local project validation has not been run in this environment. Run the five commands in APPLY_UPDATE_27.md.

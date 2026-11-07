@@ -1,0 +1,10 @@
+MERUNO Update 31 — Phase 4C: Specialty, Doctor Profile, Service & EGP Price Administration
+
+- Adds clinic.master-data.manage for Clinic Manager and System Admin only.
+- Adds protected staff catalog listing and controlled specialty, doctor profile, specialty-assignment, service, and doctor-service pricing APIs.
+- Adds a separate public catalog DTO that excludes employee IDs/numbers, email addresses, and phone numbers.
+- Writes every master-data mutation and its AuditLog in one database transaction.
+- Preserves existing appointment bookedPrice snapshots when current service prices change.
+- Reuses all existing Prisma models. No schema changes, migration, seed, dependencies, or environment changes.
+- Adds 20 validation tests, 3 permission tests, and 2 E2E tests.
+- Local verification expected: 130 Unit tests and 24 E2E tests, plus typecheck/lint/build.

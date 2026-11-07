@@ -1,0 +1,17 @@
+MERUNO Update 28 — Phase 4A: Consultation-room database foundation
+
+Adds:
+- ConsultationRoom Prisma model and table.
+- Optional Appointment.consultationRoomId relation.
+- PostgreSQL GiST exclusion constraint for active appointment room overlap.
+- Three migration-contract unit tests.
+- Phase 4A database documentation and updated roadmap/README.
+
+No consultation room count is assumed and no room rows are seeded.
+RadiologyResource remains separate and modality-limited to Digital X-ray/Ultrasound.
+
+Database change: one additive migration, expected as migration 3 after the two currently applied migrations.
+Dependencies: none.
+Seed: not required.
+Expected test totals after local application: 89 unit tests, 22 E2E tests.
+Local Prisma validation, migration deployment, and full test/build verification remain pending.

@@ -1,0 +1,20 @@
+MERUNO Update 08 — Phase 2B: Appointments and Clinical Records
+
+Schema additions (13 models):
+Appointment, AppointmentStatusHistory, QueueEntry, IdentityVerification,
+Encounter, ClinicalNote, VitalSign, DiagnosisCatalog, EncounterDiagnosis,
+Prescription, PrescriptionItem, ClinicalAmendment, Referral.
+
+Also adds the corresponding relations to Employee, DoctorProfile, DoctorService,
+Specialty, and Patient, plus appointment/queue/identity/clinical enums. Appointment references the doctor-specific service using a composite foreign key. Status history can identify an employee or patient actor. Walk-ins are queue entries, not appointments.
+
+No package changes, migrations, seed data, database writes, generated files,
+or authentication implementation are included.
+
+Security/design notes:
+- Identity verification records evidence types and results, not raw identity values.
+- Encounter is separate from Appointment and supports walk-in origin through QueueEntry.
+- Appointment price and duration are snapshots.
+- Signed note corrections are appended through ClinicalAmendment.
+- Authorization remains blocked until Phase 3 is implemented.
+- PostgreSQL CHECK, partial unique, and exclusion constraints are documented for Phase 2E.

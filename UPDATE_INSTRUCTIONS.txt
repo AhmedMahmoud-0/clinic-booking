@@ -1,0 +1,34 @@
+MERUNO DOCUMENTATION ALIGNMENT UPDATE
+
+Apply this update to the existing clinic-booking project root. Copy the included files over the matching paths and replace when prompted:
+
+- README.md
+- AGENTS.md
+- docs/architecture.md
+- docs/implementation-roadmap.md (new)
+
+Important: AGENTS.md was updated only outside its managed Next.js block at the beginning. The managed block remains unchanged.
+
+This update does not change application code, package dependencies, Prisma schema, migrations, or the private .env file. It documents the code already present in the supplied archive and records the approved 13-phase roadmap.
+
+Safe cleanup candidates identified in the supplied archive (not included in this ZIP):
+- public/file.svg
+- public/globe.svg
+- public/next.svg
+- public/vercel.svg
+- public/window.svg
+These are unused Create Next App scaffold assets; no source reference was found. Delete them manually only after confirming they are also unused in your local working tree.
+
+Other generated/non-runtime items:
+- tsconfig.tsbuildinfo is a disposable TypeScript build cache; it is ignored by Git.
+- generated/prisma is generated client output and is Git-ignored. Keep it locally for the current build, or regenerate it using npm run db:generate after npm ci. Do not commit it.
+- node_modules and .next are generated and should not be copied to GitHub.
+
+Keep these items:
+- .gitignore (commit this file).
+- .env.example (commit this fake template).
+- package.json and package-lock.json (commit both).
+- Your real .env file locally only; never copy it into update ZIPs or push it to GitHub.
+- Your existing hidden .git directory. This update ZIP intentionally does not contain it. Do not replace/delete your existing project root or .git directory when applying the files.
+
+The uploaded archive did not contain .env or .git, which is correct for a source-update package.

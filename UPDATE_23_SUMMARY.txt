@@ -1,0 +1,18 @@
+MERUNO UPDATE 23 — PHASE 3F: PROTECTED ROUTES AND AUTHENTICATED DATA ACCESS
+
+ADDED:
+- Least-privilege employee workspace-entry policy.
+- Server-only employee workspace and verified patient portal guards.
+- Route Handler guards for employee permissions, staff workspaces, patient portal identity, and exact-scope patient-record access.
+- Server-only wrappers for employee-authorized and patient-scoped data-access callbacks.
+- 11 workspace policy unit tests.
+
+REPLACED:
+- Account-linking routes now use the common operation-specific employee permission Route Handler guard.
+- Removed duplicated session/employee/role lookup from the account-linking common helper.
+- Updated authorization exports, README, and implementation roadmap.
+
+NO PRISMA SCHEMA / MIGRATION / SEED / DEPENDENCY / PACKAGE SCRIPT CHANGE.
+NO ENVIRONMENT FILE OR DATABASE CHANGE.
+
+Expected local checks after applying: typecheck, lint, npm test (35 unit tests), test:e2e (6 tests), build.

@@ -1,0 +1,17 @@
+MERUNO Update 26 Fix 01 — E2E Origin Alignment
+
+Cause:
+The employee-invitation acceptance test hard-coded Origin=https://localhost:3100. The server guard compares Origin with BETTER_AUTH_URL and rejected the mismatch with 403 before the route checked for a session.
+
+Fix:
+Load Next.js development environment using @next/env in Playwright config. Derive baseURL, webServer URL/protocol/port, and test Origin from BETTER_AUTH_URL. Preserve server-side origin validation.
+
+Files replaced:
+- playwright.config.ts
+- tests/e2e/employee-invitation.spec.ts
+- docs/implementation-roadmap.md
+- docs/authentication/phase-3g-b2-employee-invitations.md
+
+No dependencies, Prisma schema, migration, database, or server authorization changes.
+
+Re-run the five project validation commands in APPLY_UPDATE_26_FIX_01.md.

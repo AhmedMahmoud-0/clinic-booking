@@ -1,0 +1,19 @@
+MERUNO UPDATE 22 — PHASE 3E AUTHORIZATION CORE
+
+NEW:
+- Verified session-to-clinic-actor resolver.
+- Least-privilege role-to-permission policy.
+- Server guards for employee roles, permissions, and patient identity.
+- Patient self/delegated access guard with exact-scope checks.
+- Minor legal-guardian and adult subject-approval policy checks.
+- 13 unit tests for authorization and delegation policies.
+
+REPLACED:
+- Account-linking shared helper and its two API route handlers now rely on the central permission matrix.
+- README and implementation roadmap now reflect the three delivery parts and current Phase 3A–3E status.
+
+NO SCHEMA / MIGRATION / DEPENDENCY CHANGE.
+NO ENVIRONMENT FILE OR DATABASE CHANGE.
+
+Run: typecheck, lint, test, test:e2e, build.
+Expected unit-test total: 24 (11 previously reported + 13 new), assuming no local test changes.

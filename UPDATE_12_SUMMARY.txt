@@ -1,0 +1,16 @@
+MERUNO Update 12 — Billing and Database Integrity Hardening
+
+Schema changes:
+- DiscountApproval becomes one-to-many from Invoice, keeps history, and adds invoice/requestedAt index.
+- AuditLog employee relation changes from ON DELETE SET NULL to ON DELETE RESTRICT.
+
+Migration preview additions:
+- Active weekly schedule overlap exclusion.
+- One pending discount request per invoice.
+- Full payment amount and currency guard, plus deferred invoice/payment/refund state reconciliation.
+- Deferred invoice line/subtotal/currency reconciliation.
+- Deferred invoice/encounter patient match.
+- Radiology schedule/status requirements and resource/procedure modality match.
+- Refund invoice ownership, header/item reconciliation, per-item and per-invoice caps, full-payment prerequisite, and invoice locking.
+
+No migration was applied. No database was modified. Seed was not run.

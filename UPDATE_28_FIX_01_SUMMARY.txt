@@ -1,0 +1,16 @@
+MERUNO Update 28 — Fix 01
+Phase 4A: Consultation Rooms
+
+Fixed TypeScript quote parsing in tests/unit/consultation-room-migration.test.ts by changing the SQL assertion to a template literal.
+
+No Prisma schema or migration SQL changes.
+No database impact. No dependency installation, migration deployment, Prisma generation, or seed run required.
+
+Expected verification after this fix:
+- Typecheck: pass
+- Lint: pass
+- Unit: 89 tests / 12 files
+- E2E: 22 tests
+- Build: pass
+
+Local verification remains pending.

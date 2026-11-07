@@ -1,0 +1,7 @@
+MERUNO Update 30 — Phase 4B2
+Doctor weekly schedule and clinic-hours integrity
+
+Files: one additive PostgreSQL migration, one new unit contract test, one database design note, README and roadmap updates, apply guide, and file guide.
+No Prisma schema change, no generated client change, no dependencies, no env variables, no seed, no application route, and no data rewrite.
+Expected migration count: 5 (four previously applied + this migration).
+Expected tests: 106 Unit, 22 E2E.

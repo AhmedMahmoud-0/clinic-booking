@@ -1,0 +1,17 @@
+MERUNO Update 26 — Phase 3G-B2: Controlled Employee Invitations
+
+Adds System Admin-only issue/resend and revoke endpoints, token-backed invitation preview, invitee identity setup through the existing Better Auth sign-up/email-verification flow, and explicit verified acceptance that links an existing active Employee to a User.
+
+Security:
+- Existing employee.account.link permission (System Admin only).
+- Existing active Employee and stored work email required.
+- 256-bit random one-time token; only SHA-256 digest persisted.
+- 72-hour expiry; resend invalidates the previous invitation.
+- Email and Employee workEmail rechecked at acceptance.
+- Serial transaction creates EmployeeAccount only; no Employee creation or role grants.
+- Same-origin mutation routes and audit events.
+
+No Prisma schema/migration/client generation, dependencies, package scripts, or environment changes.
+
+Expected local tests after update: 64 unit and 17 E2E (from confirmed 51/14 baseline).
+Local typecheck/lint/tests/build are not claimed as run in this environment; run the five commands in APPLY_UPDATE_26.md.

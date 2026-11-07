@@ -1,0 +1,14 @@
+MERUNO Update 25 — Phase 3G-B1
+
+Implements a two-address, two-step email change:
+- Approval link to the current email (15-minute expiry).
+- Verification link to the new email (1-hour expiry).
+- SHA-256 token digests stored in the existing Verification table.
+- Case-insensitive collision checks across User, Employee.workEmail, and PatientContact EMAIL.
+- Atomic serializable update of User.email and linked Employee/Patient contact data.
+- Minimal USER_EMAIL_CHANGED audit event.
+- Revokes all sessions after success.
+- GET page load does not confirm a link; a user click is required.
+
+No dependencies, schema changes, migrations, environment variables, or package scripts.
+Adds 10 unit tests and 3 E2E tests. Local validation remains the developer's responsibility.

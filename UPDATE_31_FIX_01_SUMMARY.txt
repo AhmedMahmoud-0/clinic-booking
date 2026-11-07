@@ -1,0 +1,8 @@
+MERUNO Update 31 — Fix 01
+Phase 4C: Doctor Specialty Replacement Input Contract
+
+- Require doctorId in doctorSpecialtyReplaceSchema.
+- Match the existing route's input.doctorId usage.
+- Add regression coverage ensuring a missing doctorId is rejected.
+- No Prisma, migration, dependency, environment, or database changes.
+- Expected verification: 131 Unit tests, 24 E2E tests, plus typecheck/lint/build.

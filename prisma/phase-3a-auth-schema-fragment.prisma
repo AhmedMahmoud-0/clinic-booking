@@ -1,0 +1,247 @@
+// MERUNO Phase 3A — Authentication and account-linking schema fragment.
+// This is a PATCH FRAGMENT, not a standalone Prisma schema.
+// Follow docs/authentication/phase-3a-schema-placement.md for exact placement.
+
+// -----------------------------------------------------------------------------
+// Enums — append with the existing enums near the top of schema.prisma.
+// -----------------------------------------------------------------------------
+
+enum EmployeeRole {
+  RECEPTION
+  DOCTOR
+  NURSE
+  LAB_STAFF
+  RADIOLOGY_STAFF
+  RADIOLOGIST
+  CASHIER
+  CLINIC_MANAGER
+  SYSTEM_ADMIN
+}
+
+enum EmployeeRoleAssignmentStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum PatientAccessGrantStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  REVOKED
+  EXPIRED
+}
+
+enum PatientAccessScope {
+  VIEW_PROFILE
+  MANAGE_PROFILE
+  BOOK_APPOINTMENTS
+  MANAGE_APPOINTMENTS
+  VIEW_BILLING
+  VIEW_MEDICAL_RECORDS
+  VIEW_DIAGNOSTIC_RESULTS
+}
+
+// -----------------------------------------------------------------------------
+// Add the following inverse relation fields to the existing models.
+// -----------------------------------------------------------------------------
+
+// In model Employee:
+// authAccount EmployeeAccount? @relation("EmployeeAuthAccount")
+// linkedEmployeeAccounts EmployeeAccount[] @relation("EmployeeAccountLinker")
+// verifiedPatientAccounts PatientAccount[] @relation("PatientAccountVerifier")
+// roleAssignments EmployeeRoleAssignment[] @relation("EmployeeRoleAssignments")
+// grantedRoleAssignments EmployeeRoleAssignment[] @relation("EmployeeRoleGrantors")
+// revokedRoleAssignments EmployeeRoleAssignment[] @relation("EmployeeRoleRevokers")
+// requestedPatientAccessGrants PatientAccessGrant[] @relation("PatientAccessGrantEmployeeRequester")
+// verifiedPatientAccessGrants PatientAccessGrant[] @relation("PatientAccessGrantVerifier")
+
+// In model Patient:
+// authAccount PatientAccount?
+// accessGrantsAsSubject PatientAccessGrant[] @relation("PatientAccessGrantSubject")
+// accessGrantsAsGrantee PatientAccessGrant[] @relation("PatientAccessGrantGrantee")
+// approvedAccessGrants PatientAccessGrant[] @relation("PatientAccessGrantPatientApprover")
+
+// In model PatientRelationship:
+// accessGrants PatientAccessGrant[]
+
+// -----------------------------------------------------------------------------
+// Better Auth core models.
+// Model names stay as User, Session, Account, and Verification because the
+// Prisma adapter resolves these model names. @@map keeps physical tables lower-case.
+// -----------------------------------------------------------------------------
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique @db.VarChar(254)
+  emailVerified Boolean   @default(false)
+  image         String?   @db.Text
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
+
+  sessions        Session[]
+  accounts        Account[]
+  employeeAccount EmployeeAccount?
+  patientAccount  PatientAccount?
+
+  @@map("auth_user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime @db.Timestamptz(3)
+  token     String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  ipAddress String?  @db.VarChar(45)
+  userAgent String?  @db.Text
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("auth_session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String    @db.VarChar(255)
+  providerId            String    @db.VarChar(100)
+  userId                String
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(3)
+  scope                 String?   @db.Text
+  password              String?   @db.Text
+  createdAt             DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @db.Timestamptz(3)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("auth_account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String   @db.VarChar(255)
+  value      String   @db.Text
+  expiresAt  DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([identifier])
+  @@map("auth_verification")
+}
+
+// -----------------------------------------------------------------------------
+// Explicit 1:1 identity links. User is not the medical or employee record.
+// A user may have an employee link, a patient link, or both where appropriate.
+// -----------------------------------------------------------------------------
+
+model EmployeeAccount {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  employeeId           String   @unique
+  linkedByEmployeeId   String?
+  linkedAt             DateTime @default(now()) @db.Timestamptz(3)
+  verifiedAt           DateTime? @db.Timestamptz(3)
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  employee             Employee @relation("EmployeeAuthAccount", fields: [employeeId], references: [id], onDelete: Restrict)
+  linkedBy             Employee? @relation("EmployeeAccountLinker", fields: [linkedByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([linkedByEmployeeId, linkedAt])
+}
+
+model PatientAccount {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  patientId            String   @unique
+  linkedAt             DateTime @default(now()) @db.Timestamptz(3)
+  verifiedAt           DateTime? @db.Timestamptz(3)
+  verifiedByEmployeeId String?
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  patient              Patient  @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  verifiedByEmployee   Employee? @relation("PatientAccountVerifier", fields: [verifiedByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([verifiedByEmployeeId, verifiedAt])
+}
+
+// -----------------------------------------------------------------------------
+// Employee role assignment. The domain role is not a client-writable auth field.
+// One current assignment row per employee/role; grant/revoke events are retained
+// in AuditLog when the application changes this row.
+// -----------------------------------------------------------------------------
+
+model EmployeeRoleAssignment {
+  id                 String                        @id @default(cuid())
+  employeeId         String
+  role               EmployeeRole
+  status             EmployeeRoleAssignmentStatus @default(ACTIVE)
+  grantedByEmployeeId String?
+  revokedByEmployeeId String?
+  reason             String?                       @db.VarChar(500)
+  grantedAt          DateTime                      @default(now()) @db.Timestamptz(3)
+  revokedAt          DateTime?                     @db.Timestamptz(3)
+  createdAt          DateTime                      @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime                      @updatedAt @db.Timestamptz(3)
+
+  employee           Employee  @relation("EmployeeRoleAssignments", fields: [employeeId], references: [id], onDelete: Restrict)
+  grantedBy          Employee? @relation("EmployeeRoleGrantors", fields: [grantedByEmployeeId], references: [id], onDelete: Restrict)
+  revokedBy          Employee? @relation("EmployeeRoleRevokers", fields: [revokedByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@unique([employeeId, role])
+  @@index([employeeId, status])
+  @@index([role, status])
+}
+
+// -----------------------------------------------------------------------------
+// Patient delegation. subjectPatientId is the patient whose data is accessed;
+// granteePatientId is the related patient profile receiving access.
+// The composite relation guarantees the PatientRelationship direction:
+// PatientRelationship.patientId = subject and relatedPatientId = grantee.
+// Runtime policy must still verify legal-guardian status or adult approval.
+// -----------------------------------------------------------------------------
+
+model PatientAccessGrant {
+  id                    String                    @id @default(cuid())
+  subjectPatientId      String
+  granteePatientId      String
+  requestedByEmployeeId String?
+  approvedByPatientId   String?
+  verifiedByEmployeeId  String?
+  status                PatientAccessGrantStatus @default(PENDING)
+  reason                String?                   @db.VarChar(500)
+  requestedAt           DateTime                  @default(now()) @db.Timestamptz(3)
+  approvedAt            DateTime?                 @db.Timestamptz(3)
+  verifiedAt            DateTime?                 @db.Timestamptz(3)
+  expiresAt             DateTime?                 @db.Timestamptz(3)
+  revokedAt             DateTime?                 @db.Timestamptz(3)
+  createdAt             DateTime                  @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime                  @updatedAt @db.Timestamptz(3)
+
+  subjectPatient        Patient  @relation("PatientAccessGrantSubject", fields: [subjectPatientId], references: [id], onDelete: Restrict)
+  granteePatient        Patient  @relation("PatientAccessGrantGrantee", fields: [granteePatientId], references: [id], onDelete: Restrict)
+  relationship          PatientRelationship @relation(fields: [subjectPatientId, granteePatientId], references: [patientId, relatedPatientId], onDelete: Restrict)
+  requestedByEmployee   Employee? @relation("PatientAccessGrantEmployeeRequester", fields: [requestedByEmployeeId], references: [id], onDelete: Restrict)
+  approvedByPatient     Patient? @relation("PatientAccessGrantPatientApprover", fields: [approvedByPatientId], references: [id], onDelete: Restrict)
+  verifiedByEmployee    Employee? @relation("PatientAccessGrantVerifier", fields: [verifiedByEmployeeId], references: [id], onDelete: Restrict)
+  permissions           PatientAccessGrantPermission[]
+
+  @@unique([subjectPatientId, granteePatientId])
+  @@index([subjectPatientId, status])
+  @@index([granteePatientId, status])
+  @@index([expiresAt])
+}
+
+model PatientAccessGrantPermission {
+  id        String             @id @default(cuid())
+  grantId   String
+  scope     PatientAccessScope
+  createdAt DateTime           @default(now()) @db.Timestamptz(3)
+  grant     PatientAccessGrant @relation(fields: [grantId], references: [id], onDelete: Restrict)
+
+  @@unique([grantId, scope])
+  @@index([scope])
+}

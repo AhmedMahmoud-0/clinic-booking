@@ -1,0 +1,24 @@
+MERUNO Update 07 — Phase 2A Hardening
+
+Purpose:
+Refine the Phase 2A patient/family data model, record future database-level constraints, and correct implementation status documentation.
+
+Schema changes:
+- Add PatientGender enum and optional Patient.gender.
+- Separate relationshipType (family relationship) from isLegalGuardian.
+- Add guardian verification timestamp and verifying Employee relation.
+- Keep the total model count at 11.
+
+Documentation changes:
+- Phase 2A model design and constraints register updated.
+- README, implementation roadmap, and architecture status aligned with confirmed local progress.
+
+Safety:
+- No migration, database write, seed, credential, dependency, generated client, or source workflow changes.
+- No .env, .git, node_modules, .next, or generated/prisma files included.
+
+Local verification required after applying:
+1. npm run db:validate
+2. npm run db:generate
+3. npm run typecheck
+Run one command at a time and review the output before continuing.

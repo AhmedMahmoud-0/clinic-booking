@@ -1,0 +1,7 @@
+MERUNO Update 09 — Phase 2C: Laboratory & Radiology
+
+Adds 21 Prisma models: 11 laboratory and 10 radiology models. Extends Employee and Encounter reverse relations. Updates README, architecture, and roadmap status. Adds Phase 2C schema design documentation and apply instructions.
+
+No migrations, seeds, DB push, reset, or database writes. Existing `.env`, `.git`, node_modules, `.next`, and generated Prisma output are not included.
+
+The schema has not been validated in this package-generation environment. Run the complete verification batch in APPLY_UPDATE_09.md on the developer machine.

@@ -1,0 +1,15 @@
+MERUNO Update 26 Fix 02 — Playwright ESM Environment Loading
+
+Cause:
+Playwright failed while loading playwright.config.ts because Node's ESM loader could not find a statically exposed named export `loadEnvConfig` from @next/env.
+
+Correction:
+Use Node's createRequire(import.meta.url) to load @next/env through its CommonJS-compatible interface, then call loadEnvConfig(process.cwd(), true). Keep the existing BETTER_AUTH_URL-based Playwright origin alignment.
+
+Scope:
+- Playwright configuration compatibility only.
+- No app route, auth policy, origin guard, invitation logic, dependency, database, Prisma schema, migration, or .env changes.
+
+Validation expected:
+64 unit tests and 17 E2E tests; run all five standard validation commands in APPLY_UPDATE_26_FIX_02.md.
+Local validation is pending.

@@ -1,0 +1,16 @@
+MERUNO Update 25 Fix 01 — Phase 3G-B1 E2E Authentication Entry
+
+Scope:
+- Fix login E2E navigation waiting for DOM readiness rather than all resources.
+- Explicitly clear cookies before testing the signed-out account-status redirect.
+- Preserve the exact password textbox locator introduced in Update 24 Fix 01.
+
+Files:
+- Replace tests/e2e/auth-entry.spec.ts
+- Add APPLY_UPDATE_25_FIX_01.md
+- Add UPDATE_25_FIX_01_FILE_GUIDE.md
+- Add docs/authentication/phase-3g-b1-e2e-fix-01.md
+- Replace docs/implementation-roadmap.md
+
+No package, runtime application, schema, migration, generated client, or database changes.
+Local test validation is pending.
