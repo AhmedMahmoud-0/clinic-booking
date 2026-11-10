@@ -1,0 +1,25 @@
+MERUNO Update 39 — Phase 6A Public Appointment Availability Foundation
+
+Scope:
+- Add a public read-only availability endpoint.
+- Reuse existing clinic/doctor schedules, schedule exceptions, DoctorService duration/current price, Appointment conflict windows, and ConsultationRoom capacity.
+- Centralize Cairo-local wall-clock to instant conversion in the existing clinic-time helper.
+- Add pure unit tests, request validation tests, and public endpoint E2E tests.
+- Update README and implementation roadmap after the developer's confirmed Update 38 results.
+
+Safety:
+- No Prisma schema or migration changes.
+- No database writes, migrations, seed, reset, or db push.
+- No dependencies or environment changes.
+- No patient, guest, appointment, queue, room reservation, or audit record creation.
+- Availability is advisory; booking must recheck in a transaction and rely on database constraints.
+
+Expected tests based on the verified Update 38 baseline:
+- 332 Vitest tests across 35 files.
+- 45 Playwright E2E tests.
+- Typecheck, lint, and production build pass.
+
+Critical Phase 6B gates documented:
+- Guest identity path compatible with required Appointment.patientId and Reception two-identifier verification.
+- A transaction-safe, permissioned/audited patient-overlap override that does not weaken doctor/room conflict constraints.
+- Booking authority for guardians/adult delegates remains separate from medical-record access.

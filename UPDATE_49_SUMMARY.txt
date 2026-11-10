@@ -1,0 +1,24 @@
+MERUNO Update 49 — Phase 6C5: Reception Appointment Cancellation and Rescheduling
+
+Adds:
+- POST /api/reception/appointments/:appointmentId/cancel
+- POST /api/reception/appointments/:appointmentId/reschedule
+- Active employee permission and Reception role rechecks.
+- Strict bounded reason codes: PATIENT_REQUESTED, DOCTOR_UNAVAILABLE, CLINIC_OPERATIONAL, DUPLICATE_BOOKING.
+- Support for consistent Patient-linked and pending/linked public guest appointment identity states.
+- Upcoming CONFIRMED appointments only; no after-check-in or terminal-state changes.
+- STANDARD/LATE classification around the exact inclusive 24-hour boundary.
+- Patient schedule mutex -> Appointment -> GuestAppointmentContact lock order.
+- Same-doctor/same-service rescheduling, preserving duration and booked price/currency.
+- In-transaction slot, patient-overlap, and room revalidation.
+- STAFF AppointmentStatusHistory plus PII-minimal AuditLog events.
+- Pending guest management token invalidation on Reception cancellation.
+
+No Prisma schema, migration, seed, dependency, package, or environment changes.
+
+Expected verification from Update 48 baseline:
+- 511 unit tests / 57 files
+- 70 E2E tests
+- typecheck, lint, and build pass
+
+Full application tests have not been run in the patch-generation environment. Run APPLY_UPDATE_49.md locally.

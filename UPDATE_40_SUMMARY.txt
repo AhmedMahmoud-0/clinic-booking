@@ -1,0 +1,10 @@
+MERUNO Update 40 — Phase 6B1 Authenticated Patient Booking
+
+Adds a verified patient-portal appointment booking API for self-booking or exact active BOOK_APPOINTMENTS delegated booking.
+Reuses Phase 6A availability calculation inside a Serializable transaction.
+Snapshots duration/price, assigns a free configured consultation room, creates CONFIRMED and initial PATIENT status history.
+Keeps the current doctor, patient, and consultation-room PostgreSQL exclusion constraints unchanged.
+No guest booking, Reception booking, patient-overlap override, UI, queue, cancellation, migration, seed, dependency, or environment changes.
+
+Expected local checks: 356 Vitest tests across 37 files; 46 Playwright E2E tests; typecheck, lint, and production build pass.
+Local verification is pending until the developer runs the five checks.

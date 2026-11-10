@@ -1,0 +1,7 @@
+MERUNO Update 35 — Phase 5C Patient Contacts & Consents
+
+Adds phone/email, address, emergency-contact maintenance and append-only consent/refusal/withdrawal history.
+Adds the sixth additive PostgreSQL migration. Existing PatientContact rows remain and default active.
+Reception can read/manage contact profiles; Reception and Doctor can read/record consent events using separate least-privilege permissions. Adult self-signing and verified legal-guardian signing for minors are enforced.
+Consent history cannot be updated/deleted in the application or directly in PostgreSQL.
+No seed and no new npm dependency. New unit tests: 55; new E2E tests: 4. Expected totals from the latest verified baseline: 259 Unit and 33 E2E. Prisma validation, client generation and migrate deploy are required.

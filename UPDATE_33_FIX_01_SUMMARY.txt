@@ -1,0 +1,9 @@
+MERUNO Update 33 — Fix 01
+Patient duplicate phone comparison
+
+Fixes local Egyptian phone vs +20 country-code equivalence in pure matching and database candidate lookup.
+Preserves the existing digits-only normalizer and supports legacy PatientContact.normalizedValue rows.
+Does not change duplicate confidence: exact full name + date of birth is HIGH; shared-phone-only and ambiguous family matches remain REVIEW.
+
+No schema migration, database write, dependency, seed, or environment change.
+Expected validation: 185 Unit tests, 28 E2E tests, typecheck/lint/build pass.

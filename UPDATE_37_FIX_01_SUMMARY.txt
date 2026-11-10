@@ -1,0 +1,20 @@
+MERUNO Update 37 Fix 01 — Failed migration recovery
+
+Root cause: the original seventh migration tried to drop a PatientRelationship check constraint that was not present in this database. Earlier DDL may have persisted, so a plain retry could fail on duplicate objects.
+
+Changes:
+- Enum creation tolerates an already-created enum.
+- Adds missing columns only.
+- Drops the optional prior check constraint only when present, then installs the required check.
+- Makes functions, triggers, foreign key, and indexes safe to resume.
+- Updates the migration contract test for idempotent recovery.
+
+Recovery:
+1. Back up the local clinic-booking database.
+2. Replace the migration.sql and patient-relationship-migration.test.ts files.
+3. Run db:validate and db:generate.
+4. Run prisma migrate resolve --rolled-back for the one failed migration.
+5. Run prisma migrate deploy.
+6. Confirm db:migrate:status reports the schema up to date.
+
+No reset, db push, manual object deletion, or --applied resolution. No new migration or dependency.

@@ -1,0 +1,12 @@
+MERUNO Update 46 — Phase 6C2 Patient Self-Service Rescheduling
+
+Adds patient portal rescheduling for a confirmed Patient-linked appointment at least 24 hours before its existing time.
+Only the date/time changes. Doctor, service, duration, booked-price snapshot, currency, booking reference, and confirmation timestamp remain unchanged.
+Delegates require exact MANAGE_APPOINTMENTS authority. BOOK_APPOINTMENTS is not enough.
+Availability excludes only the appointment being moved from doctor/room busy intervals through an internal-only function option.
+Patient overlap, doctor availability, consultation room availability, and appointment state are rechecked in a Serializable transaction.
+A patient actor history event preserves CONFIRMED status and records previous/new UTC starts.
+No schema, migration, package, dependency, environment, UI, guest, or Reception changes.
+
+Expected verification: 458 unit tests across 51 files; 57 E2E tests; typecheck, lint, and build pass.
+Full project tests have not been run in the packaging environment; local checks are required.

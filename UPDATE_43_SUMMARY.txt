@@ -1,0 +1,19 @@
+MERUNO Update 43 — Phase 6B3B Guest Appointment Identity Resolution
+
+Adds a Reception-only route to resolve a confirmed public guest appointment to one existing active Patient after two distinct stored identity elements match.
+
+Atomic success path:
+- Create a matching VERIFIED IdentityVerification tied to the appointment and selected Patient.
+- Set Appointment.patientId.
+- Mark GuestAppointmentContact LINKED with Patient, Reception employee, and timestamp.
+- Revoke the guest-management bearer token by rotating its stored hash to an unreachable random hash.
+- Write PII-minimal identity-verification and guest-link audit events.
+
+Other paths:
+- Identity mismatch: persist FAILED IdentityVerification + audit; leave appointment unresolved.
+- Patient overlap: audit the blocked attempt; leave appointment unresolved and return conflict.
+- Database race conflict: return conflict; never bypass PostgreSQL exclusion constraints.
+
+No Prisma schema or migration changes. No dependencies or environment changes. No queue, encounter, account, MRN, relationship, or delegation records are created.
+
+Expected local verification after unchanged Update 42 baseline: 406 Unit Tests, 53 Playwright E2E Tests, typecheck, lint, production build.

@@ -1,0 +1,28 @@
+MERUNO Update 52 — Phase 6D3 Reception Walk-in Registration
+
+New API:
+- POST /api/reception/walk-ins
+
+Behavior:
+- Requires appointment.manage, same-origin protection, and active Reception assignment.
+- Existing active Patient only; new patients use the already implemented Reception patient-registration operation first.
+- Requires two distinct stored identity elements; submitted identifier values are not retained.
+- Requires configured clinic and doctor opening intervals at the current Cairo-local instant; BLOCKED exceptions override weekly/extra hours.
+- Rejects while doctor is handling an appointment or IN_SERVICE ticket, when the selected patient has a same-day blocking appointment with that doctor, or an active queue entry already exists for that patient/doctor.
+- Creates QueueEntry type WALK_IN/status WAITING with no Appointment, using the shared per-doctor queue-number lock inside the Serializable transaction.
+- Call Next now prioritizes booked appointment tickets and holds walk-ins while a current-day CONFIRMED appointment remains within its scheduled window. A called walk-in is deferred back to WAITING if an appointment later takes priority.
+- In-service ticket blocks a further Call Next.
+
+Files:
+- 8 new files
+- 3 files to replace
+
+Database:
+- No Prisma schema, migration, seed, Prisma Client generation, package/dependency, or environment changes.
+
+Expected local verification:
+- 561 unit tests across 62 files
+- 80 Playwright E2E tests
+- typecheck, lint, and production build pass
+
+No full project Vitest, Playwright, PostgreSQL, or production build execution was available in the package-preparation environment. Local verification is required.

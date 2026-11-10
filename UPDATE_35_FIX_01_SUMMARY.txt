@@ -1,0 +1,8 @@
+MERUNO Update 35 Fix 01 — Email contact normalization and TypeScript-safe union test
+
+- Lowercases EMAIL contact values in the parsed command output after trim/validation.
+- Leaves PHONE contact values and non-ADD_CONTACT command branches unchanged.
+- Removes TS2339 in the unit test by asserting the parsed union with toMatchObject.
+- No Prisma schema, migration, seed, generated client, dependency, or environment changes.
+- Database remains at six migrations, already confirmed up to date by the developer.
+- Expected verification: 259/259 unit tests and 33/33 E2E tests, plus typecheck, lint, and build.

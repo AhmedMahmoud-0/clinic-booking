@@ -1,0 +1,7 @@
+MERUNO Update 60 — Phase 7G Doctor Radiology Orders
+
+Adds Doctor-only active radiology catalogue search, Encounter-scoped order history, and atomic immediate ORDERED radiology order creation using active digital X-ray/ultrasound procedures only.
+
+Migration 12 adds a persisted, physician-attributed order-time X-ray screening decision (`SCREENING_REQUIRED` / `NOT_INDICATED`, rationale, employee, timestamp), PostgreSQL consistency checks, Employee FK, and modality-aware trigger. Existing history is not rewritten. The formal exam-day RadiologyPregnancyScreening remains a separate workflow; SCREENING_REQUIRED must be resolved before exam performance.
+
+Expected local verification baseline: 800 unit tests across 78 files, 109 E2E tests, plus Prisma validation/generation, typecheck, lint, and build. Migration 12 must be applied after migration 11 is confirmed applied.

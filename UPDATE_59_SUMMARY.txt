@@ -1,0 +1,12 @@
+MERUNO Update 59 — Phase 7F Doctor Laboratory Test Orders
+
+Adds:
+- GET /api/doctor/lab-catalog
+- GET /api/doctor/encounters/:encounterId/lab-orders
+- POST /api/doctor/encounters/:encounterId/lab-orders
+- Doctor-only server service, ownership/source/state policies, and strict request validation
+- Unit and E2E coverage
+
+No Prisma schema, migration, seed, dependency, package-script, or environment changes.
+Expected totals from Update 58 baseline: 751 unit tests across 75 files; 105 E2E tests.
+Local verification is required before marking Phase 7F complete.

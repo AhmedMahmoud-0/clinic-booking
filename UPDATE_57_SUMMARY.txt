@@ -1,0 +1,11 @@
+MERUNO Update 57 — Phase 7D Doctor Encounter Diagnoses
+
+Adds protected APIs to search the active diagnosis catalogue, read diagnoses for the authenticated Doctor's active Encounter, attach one catalogue diagnosis, and promote a selected diagnosis to primary.
+
+Reuses existing DiagnosisCatalog and EncounterDiagnosis models plus the existing partial unique primary-diagnosis index. No Prisma schema, migration, seed, generated client, dependency, package, or environment change.
+
+The seeded catalogue currently contains six MERUNO-DEMO labels only. They are synthetic portfolio placeholders, not an authoritative clinical coding system. No diagnosis codes are invented.
+
+Adds 29 unit tests and 4 E2E authorization-boundary tests. Expected totals after Update 56: 669 unit and 96 E2E tests.
+
+Local verification remains pending until the developer runs typecheck, lint, unit tests, E2E tests, and production build.

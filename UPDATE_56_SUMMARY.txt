@@ -1,0 +1,32 @@
+MERUNO Update 56 — Phase 7C Doctor Clinical-Note Draft
+
+New endpoint:
+PUT /api/doctor/encounters/:encounterId/clinical-note
+
+Authorization:
+- existing clinical.encounter.manage permission
+- active Doctor employee assignment + linked DoctorProfile rechecked in the database transaction
+- Encounter must belong to the authenticated Doctor and remain IN_PROGRESS
+
+Persistence:
+- chiefComplaint -> Encounter.chiefComplaint
+- historyOfPresentIllness -> ClinicalNote.subjective
+- clinicalExamination -> ClinicalNote.objective
+- assessment -> ClinicalNote.assessment (narrative, not a coded diagnosis)
+- treatmentPlan -> ClinicalNote.plan
+
+Safety:
+- Encounter row lock and Serializable transaction
+- one initial-assessment note only; same-employee DRAFT update only
+- signed notes are immutable through this route
+- PII-minimal audit event does not include clinical content
+- no schema/migration/dependency change
+
+Tests added:
+- 16 unit policy tests
+- 11 unit request-validation tests
+- 3 E2E route authorization tests
+
+Expected totals after the user's local baseline of Update 55:
+- 640 unit tests
+- 92 E2E tests

@@ -1,0 +1,19 @@
+MERUNO Update 53 — Phase 6D4 Reception No-show Recording
+
+Adds a protected Reception-only explicit no-show operation.
+
+POST /api/reception/appointments/:appointmentId/no-show
+
+- Requires appointment.manage, same-origin validation, and an active Reception assignment.
+- Requires an empty JSON object; server controls status, reason, actor, and time.
+- Only an unarrived CONFIRMED appointment with no QueueEntry can be marked NO_SHOW.
+- The inclusive 10-minute grace period must fully elapse; no same-day restriction is added.
+- Locks Appointment then GuestAppointmentContact and uses a Serializable transaction.
+- Invalidates pending unresolved guest management token hashes in the same transaction.
+- Adds STAFF AppointmentStatusHistory and a PII-minimal AuditLog event.
+- No automatic no-show, fee, penalty, QueueEntry creation, or queue-ticket state transition.
+
+No Prisma schema, migration, seed, package, dependency, or environment change.
+
+Expected after applying: 587 unit tests across 64 files; 84 Playwright E2E tests; typecheck, lint, and production build pass.
+Full project tests/build were not run in the patch-preparation environment.

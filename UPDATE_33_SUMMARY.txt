@@ -1,0 +1,9 @@
+MERUNO Update 33 — Phase 5A: Patient Registration & Duplicate Prevention
+
+Adds Reception-only patient record creation using the existing PATIENT_BASIC_MANAGE permission, a separate duplicate-candidate check endpoint, server-generated cryptographically random MRNs, two-element identity attestation, phone/email contact creation, PostgreSQL Serializable duplicate re-check, and atomic IdentityVerification/AuditLog writes.
+
+Duplicate policy: exact FULL_NAME + DATE_OF_BIRTH is high confidence and blocks creation. Other matches require explicit review acknowledgment. Shared family phone numbers are not globally unique and do not alone block registration. National ID/passport raw values are not collected or stored.
+
+Reuses Patient, PatientContact, IdentityVerification, AuditLog, and existing authorization. No Prisma schema or migration change, no seed, no db:generate, no dependency, and no environment variable required.
+
+New tests: 26 Unit + 2 E2E. Expected project totals: 183 Unit and 28 E2E. Local validation pending.

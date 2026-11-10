@@ -1,0 +1,13 @@
+MERUNO Update 36 Fix 01 — Patient Attachments & Documents
+
+Corrects all issues reported by the first local validation:
+- Removes patient.document.read and patient.document.upload from Doctor; Reception remains the only role with these permissions.
+- Makes the storage-path unit test compatible with Windows and POSIX path formats.
+- Removes one unused import from the document download API route.
+
+Files replaced: 5 (3 code/test files + README + implementation roadmap)
+Database migration: none
+Dependency installation: none
+Prisma generation: none
+Expected local result: 287/287 unit tests, 36/36 E2E tests, no lint warning; typecheck/build expected to remain passing.
+Local verification: pending developer rerun.

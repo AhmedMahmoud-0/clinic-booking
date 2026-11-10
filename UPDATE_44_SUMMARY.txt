@@ -1,0 +1,21 @@
+MERUNO UPDATE 44 — Phase 6B3C
+Audited same-patient appointment-overlap exception
+
+Status: Patch prepared; local validation and migration 10 application are pending.
+
+Includes:
+- Reception-only appointment.patient-overlap.override permission.
+- Four bounded reason codes; no free-text justification or client-supplied approver.
+- Exception support for Reception booking an existing Patient and Reception guest-to-Patient linking after two-identifier verification.
+- Immutable PostgreSQL exception evidence for each exact overlapping appointment pair.
+- Deferred commit-time PostgreSQL guard and per-patient schedule write mutex.
+- Only the patient-overlap exclusion is replaced; doctor and room overlap exclusions remain unchanged.
+- 3 new unit-test files (19 tests); existing E2E suite retained at 53 expected tests.
+- README, roadmap, and phase documentation updated.
+
+Expected local checks after migration 10:
+- 425/425 unit tests across 47 files.
+- 53/53 E2E tests.
+- typecheck, lint, and production build pass.
+
+No full project typecheck, Prisma validation, migration deployment, Vitest, Playwright, or production build was run while preparing this ZIP. Run the exact steps in APPLY_UPDATE_44.md.

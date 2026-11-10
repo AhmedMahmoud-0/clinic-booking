@@ -1,0 +1,8 @@
+MERUNO Update 36 — Phase 5D Patient Attachments & Documents
+
+Reuses the existing Attachment table; no Prisma schema change or migration.
+Adds Reception-only patient administrative document list/upload/download APIs.
+Validates PDF/JPEG/PNG by extension, MIME and signature; 10 MiB limit; SHA-256 integrity.
+Stores files outside the repository in a private local development directory.
+Local filesystem adapter is disabled in production; production persistent storage is not included.
+Adds audit events and unit/E2E coverage. Local checks have NOT been run in this environment.

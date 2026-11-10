@@ -12,6 +12,7 @@ export interface PatientDelegationPolicyInput {
   approvedByPatientId: string | null;
   approvedAt: Date | null;
   subjectDateOfBirth: Date | null;
+  relationshipIsActive: boolean;
   relationshipIsLegalGuardian: boolean;
   relationshipGuardianVerifiedAt: Date | null;
   relationshipGuardianVerifiedByEmployeeId: string | null;
@@ -40,13 +41,14 @@ export function calculatePatientAge(dateOfBirth: Date | null, now: Date): number
 
 /**
  * Evaluates whether a verified relationship grant may be used for one exact
- * patient-data scope. It intentionally fails closed when age or approval
- * evidence is missing.
+ * patient-data scope. An inactive relationship always fails closed, including
+ * adult grants that were previously approved by the subject patient.
  */
 export function isPatientDelegationAllowed(
   input: PatientDelegationPolicyInput,
 ): boolean {
   if (
+    !input.relationshipIsActive ||
     input.grantStatus !== "ACTIVE" ||
     input.grantRevokedAt !== null ||
     (input.grantExpiresAt !== null &&

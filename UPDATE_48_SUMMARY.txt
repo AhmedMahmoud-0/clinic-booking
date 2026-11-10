@@ -1,0 +1,18 @@
+MERUNO Update 48 — Phase 6C4 Guest Self-Service Rescheduling
+
+Adds:
+- POST /api/public/appointments/guest/reschedule using the existing hashed bearer management token.
+- Strict same-origin JSON contract; token accepted only in the request body and hashed before lookup.
+- Restricts use to unresolved, confirmed PUBLIC_WEBSITE guest appointments with patientId=null and pending guest identity state.
+- Inclusive 24-hour boundary based on the existing appointment's elapsed UTC start instant; the replacement must be a different future instant.
+- Keeps the existing doctor, doctor service, duration, booked-price/currency snapshots, booking reference, and confirmation status unchanged.
+- Reuses public appointment availability inside a Serializable transaction, excluding only the appointment being moved; rechecks service duration and room assignment.
+- Uses Appointment then GuestAppointmentContact row-lock order, matching guest cancellation and Reception guest linking.
+- Adds CONFIRMED -> CONFIRMED SYSTEM history with previous/new UTC instants and a PII-minimal EXTERNAL audit event.
+- Keeps the existing token hash usable for further guest management; successful cancellation or Reception linking revokes it.
+- Unit, validation, E2E coverage, docs, README and roadmap updates.
+
+No schema, migration, seed, Prisma generation, package, dependency, environment, or UI changes.
+
+Expected local totals: 495 unit tests across 55 files; 66 E2E tests; typecheck, lint, and build.
+The full project test suite has not been run in the packaging environment; local verification is required.

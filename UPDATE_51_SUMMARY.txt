@@ -1,0 +1,21 @@
+MERUNO Update 51 — Phase 6D2 Reception Doctor Queue Board and Call Next
+
+New API routes:
+- GET /api/reception/queue?doctorId=<doctorId>
+- POST /api/reception/queue/call-next
+
+Behavior:
+- Active Reception employee and appointment.manage permission required.
+- Queue scoped to one active doctor and current Cairo-local day.
+- Minimal Reception DTO; no contact data or clinical details.
+- Ticket list includes operational queue states and summary counts.
+- Call Next is serialized by locking DoctorProfile in a Serializable transaction.
+- Existing CALLED ticket is returned idempotently; no second patient is called.
+- Lowest numbered WAITING ticket is called next.
+- Inactive patient at queue head blocks the operation; no silent skip/reorder.
+- QueueEntry changes WAITING -> CALLED; Appointment status remains CHECKED_IN.
+- AuditLog records the employee actor and ticket operation without patient/clinical details.
+
+Files: 8 new, 2 replace.
+Database: no schema, migration, seed, generate, or dependency changes.
+Expected verification: 538 unit tests across 60 files; 76 E2E tests; typecheck, lint, build pass.

@@ -1,0 +1,20 @@
+MERUNO Update 63 — Phase 7J Doctor Prescription Issuance
+
+Endpoint:
+POST /api/doctor/encounters/:encounterId/prescriptions/:prescriptionId/issue
+
+Request body: {}
+
+Behavior:
+- Requires the existing clinical.encounter.manage permission and same-origin JSON request.
+- Uses the authenticated active Doctor identity and their own active Encounter.
+- Locks Encounter and Prescription rows in one Serializable transaction.
+- Issues only a DRAFT authored by the current Doctor, with issuedAt null and 1–20 persisted items.
+- Sets status ISSUED and server-generated issuedAt.
+- Writes DOCTOR_PRESCRIPTION_ISSUED audit event atomically; never copies medication content or patient details into audit reason.
+- Existing draft update endpoint remains unable to edit ISSUED prescriptions.
+
+No schema change, migration, permission change, seed change, dependency, package, or environment change.
+
+Expected test totals: 880 Unit tests across 83 files; 120 E2E tests.
+Full local verification remains the developer's responsibility.

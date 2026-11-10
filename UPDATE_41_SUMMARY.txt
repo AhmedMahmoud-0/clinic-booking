@@ -1,0 +1,7 @@
+MERUNO Update 41 — Phase 6B2 Public Guest Appointment Booking
+
+Adds public guest booking without creating a Patient/MRN. Guest appointment contact data is stored separately, with a one-time management token hash. Appointment patientId is optional only when a pending GuestAppointmentContact exists. Deferred database triggers require a verified, same-employee two-identifier IdentityVerification before Reception can link a guest booking to a Patient. Guest appointments cannot enter check-in, queue, or encounter workflows until linked. Existing doctor and room overlap constraints remain unchanged; Reception patient-overlap override is still deferred to Phase 6B3.
+
+No dependencies or environment variables changed. Migration 9 is required.
+
+Expected verification: 378 unit tests across 40 files; 49 Playwright E2E tests; typecheck, lint, production build pass.

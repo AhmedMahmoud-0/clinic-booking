@@ -1,0 +1,15 @@
+MERUNO Update 45 — Phase 6C1 Patient Self-Service Cancellation
+
+Adds:
+- Patient-only POST cancellation route for appointments linked to a Patient record.
+- Exact 24-hour cancellation boundary (inclusive), based on actual instants.
+- Exact delegated MANAGE_APPOINTMENTS scope; BOOK_APPOINTMENTS is insufficient.
+- Serializable transaction with same per-Patient schedule mutex used by booking.
+- Conditional CONFIRMED -> CANCELLED status change and PATIENT-attributed AppointmentStatusHistory record.
+- Fixed server-side cancellation reason; no client actor/reason/status inputs.
+- Unit and E2E coverage, documentation and roadmap update.
+
+No schema, migration, seed, package, environment, dependency, or UI changes.
+
+Expected local totals: 440 unit tests / 49 files, 55 E2E tests, plus typecheck, lint, build.
+Not locally verified in this patch-generation environment.

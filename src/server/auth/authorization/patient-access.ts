@@ -69,6 +69,7 @@ export async function requirePatientRecordAccess(
       },
       relationship: {
         select: {
+          isActive: true,
           isLegalGuardian: true,
           guardianVerifiedAt: true,
           guardianVerifiedByEmployeeId: true,
@@ -95,6 +96,7 @@ export async function requirePatientRecordAccess(
       approvedByPatientId: grant.approvedByPatientId,
       approvedAt: grant.approvedAt,
       subjectDateOfBirth: grant.subjectPatient.dateOfBirth,
+      relationshipIsActive: grant.relationship.isActive,
       relationshipIsLegalGuardian: grant.relationship.isLegalGuardian,
       relationshipGuardianVerifiedAt: grant.relationship.guardianVerifiedAt,
       relationshipGuardianVerifiedByEmployeeId:

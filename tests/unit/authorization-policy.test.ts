@@ -21,6 +21,7 @@ function makeDelegation(
     approvedByPatientId: null,
     approvedAt: null,
     subjectDateOfBirth: new Date("2015-03-15T00:00:00.000Z"),
+    relationshipIsActive: true,
     relationshipIsLegalGuardian: true,
     relationshipGuardianVerifiedAt: new Date("2026-10-30T10:00:00.000Z"),
     relationshipGuardianVerifiedByEmployeeId: "employee-guardian-verifier-demo",
@@ -145,6 +146,19 @@ describe("MERUNO patient delegation policy", () => {
         makeDelegation({ grantVerifiedByEmployeeId: null }),
       ),
     ).toBe(false);
+  });
+
+  it("denies delegated access when the family relationship is inactive, including adult-approved grants", () => {
+    expect(isPatientDelegationAllowed(makeDelegation({ relationshipIsActive: false }))).toBe(false);
+
+    expect(isPatientDelegationAllowed(makeDelegation({
+      subjectDateOfBirth: new Date("1990-03-15T00:00:00.000Z"),
+      approvedByPatientId: "patient-subject-demo",
+      approvedAt: new Date("2026-11-01T10:00:00.000Z"),
+      grantVerifiedAt: null,
+      grantVerifiedByEmployeeId: null,
+      relationshipIsActive: false,
+    }))).toBe(false);
   });
 
   it("fails closed when the subject patient date of birth is unavailable", () => {

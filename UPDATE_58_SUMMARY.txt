@@ -1,0 +1,16 @@
+MERUNO Update 58 — Phase 7E Doctor Prescription Drafts
+
+Adds:
+- GET and POST /api/doctor/encounters/:encounterId/prescriptions
+- PUT /api/doctor/encounters/:encounterId/prescriptions/:prescriptionId
+- Doctor/Encounter/Prescription policies and strict Zod validation
+- Draft owner/state restrictions, serializable writes, row locks, PII-minimal audit
+- Structured PRN maximum quantity per dose, unit, and max doses per day
+- Migration 11 with PRN consistency CHECK and one-DRAFT-per-Encounter partial unique index
+- 48 unit tests and 5 E2E authorization-boundary tests
+
+Baseline confirmed after Update 57 Fix 01: 669 unit tests and 96 E2E.
+Expected after Update 58: 717 unit tests and 101 E2E, assuming no unrelated local test changes.
+
+Local full-project typecheck, lint, Vitest, Playwright, and build have not been run in this packaging environment.
+See APPLY_UPDATE_58.md before applying the migration.

@@ -1,0 +1,16 @@
+MERUNO Update 37 — Phase 5E-1
+Family Relationships & Evidence-backed Legal-Guardian Verification
+
+STATUS: Prepared for local application; not yet locally validated.
+
+Adds directed family links between existing active patient records; Reception-only relationship read/manage permissions; legal-guardian verification for minors using an existing PATIENT_DOCUMENT attachment on the same patient record; evidence metadata and PostgreSQL ownership/protection rules; explicit guardian revocation; and atomic revocation of pending/active delegated access grants for the exact directed relationship.
+
+Migration: 20261108040000_patient_family_relationships_guardian_workflows (seventh migration). It preserves verified legacy guardian rows with an explicit guardianVerificationLegacy marker. A database trigger prevents new records from opting into the legacy exemption; new guardian verifications must include evidence type and attachment reference.
+
+No dependency installation, package script change, environment variable, seed, or UI is included. Prisma Client regeneration and one additive PostgreSQL migration are required.
+
+Expected tests, assuming the current confirmed baseline is unchanged: 306 Unit Tests and 40 E2E Tests.
+
+This is Phase 5E-1 only. Family relationship correction/deactivation and user-facing family management remain before Phase 6.
+
+See APPLY_UPDATE_37.md and UPDATE_37_FILE_GUIDE.md.

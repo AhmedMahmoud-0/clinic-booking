@@ -1,0 +1,19 @@
+MERUNO Update 38 — Phase 5E-2: Family Relationship Lifecycle
+
+Adds controlled correction and terminal soft deactivation for directed family relationship records.
+- Reception-only PATCH correction endpoint with an enum reason code.
+- Reception-only POST deactivation endpoint with an enum reason code.
+- Audit events retain relationship changes, actor, bounded reason code, guardian reset metadata, and grant-revocation count only.
+- Correcting a verified guardian relationship clears its current evidence-backed guardian state and revokes linked pending/active grants.
+- Deactivation retains the relationship row, clears current guardian state, and revokes all linked pending/active grants atomically.
+- PostgreSQL prevents reactivation or mutation of a deactivated relationship.
+- Delegated access and new delegation issuance now require the underlying relationship to remain active; minor consent signer lookup also checks active relationship state.
+- No patient, relationship, grant, document, or audit data is deleted.
+
+Database: new migration 20261108050000_patient_relationship_lifecycle (migration 8).
+Dependencies: none.
+Environment variables: none.
+Seed: not required.
+Prisma Client generation: required after schema update.
+
+Expected validation baseline (assuming the user's last confirmed suite is unchanged): 315 unit tests and 42 E2E tests, plus typecheck, lint, and production build. These expectations are not claims that the full project was executed in this environment.

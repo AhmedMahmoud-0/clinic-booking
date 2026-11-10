@@ -1,0 +1,15 @@
+MERUNO Update 47 — Phase 6C3 Guest Self-Service Cancellation
+
+Adds:
+- POST /api/public/appointments/guest/cancel using the existing high-entropy bearer management token.
+- Strict same-origin JSON contract; raw token is accepted only in request body and hashed before lookup.
+- Restricts use to confirmed, unresolved public guest appointments with no Patient link.
+- Inclusive 24-hour minimum cancellation window; late requests leave the appointment unchanged and direct the guest to Reception.
+- Appointment and guest-contact row locks in a consistent order, Serializable transaction, conditional writes, and safe conflict handling.
+- CONFIRMED -> CANCELLED lifecycle history, PII-minimal EXTERNAL audit event, and same-transaction token-hash revocation.
+- Unit, validation, E2E coverage, documentation, README and roadmap updates.
+
+No schema, migration, seed, Prisma generation, package, dependency, environment, or UI changes.
+
+Expected local totals: 475 unit tests across 53 files; 62 E2E tests; typecheck, lint, and build.
+The full project test suite has not been run in the packaging environment; local verification is required.

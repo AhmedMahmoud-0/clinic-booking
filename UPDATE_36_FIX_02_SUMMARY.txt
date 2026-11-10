@@ -1,0 +1,8 @@
+MERUNO Update 36 Fix 02 — Patient Document Permission Test
+
+Scope: test-only correction.
+Cause: the test assumed every non-Reception employee role has patient.basic.read. Clinic Manager and System Admin intentionally do not.
+Correction: the test now selects non-Reception roles that actually have patient.basic.read, then asserts that neither document read nor upload is inferred.
+Production code: unchanged.
+Database/migration/dependencies: none.
+Next: apply the single test replacement plus the included README/roadmap/docs updates, then run the five validation commands in APPLY_UPDATE_36_FIX_02.md.

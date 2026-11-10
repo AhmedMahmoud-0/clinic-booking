@@ -1,0 +1,7 @@
+MERUNO Update 61 — Phase 7H Doctor Referrals
+
+Adds Encounter-scoped Doctor referral history and creation using the existing Referral model. Supports internal referral to an active Specialty and/or active Doctor, and external referral to a named external facility. The authenticated Doctor, own Encounter, referral author, PENDING status, and timestamps are server-controlled.
+
+No schema change, migration, seed update, package change, or UI work is included. The existing Referral target-type database constraint is reused.
+
+Expected incremental tests: 36 unit tests (20 policy + 16 validation) and 3 E2E authorization-boundary tests. Against the confirmed Update 60 baseline of 800 unit tests and 109 E2E tests, expected totals are 836 unit tests and 112 E2E tests, assuming no unrelated project tests were added or removed. Local execution is required to confirm actual results.

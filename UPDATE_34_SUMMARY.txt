@@ -1,0 +1,11 @@
+MERUNO Update 34 — Phase 5B Patient Identity Verification
+
+Adds a protected employee API to verify an existing active patient using two distinct identifiers that are both represented in the current patient schema: FULL_NAME, DATE_OF_BIRTH, PHONE, and MRN.
+
+Adds the least-privilege patient.identity.verify permission for Reception, Doctor, Nurse, Lab Staff, Radiology Staff, Radiologist, and Cashier. Clinic Manager and System Admin do not receive it.
+
+Stores only identifier types, result, verifier, timestamp, and fixed non-sensitive notes in the existing IdentityVerification model. Both success and failure are audited with fixed reason text. Submitted values are never stored or included in audit/response data.
+
+No Prisma schema change, migration, seed, generated-client change, dependency, or environment variable is required.
+
+Expected local validation totals: 204 unit tests and 29 E2E tests, plus typecheck, lint, and production build.

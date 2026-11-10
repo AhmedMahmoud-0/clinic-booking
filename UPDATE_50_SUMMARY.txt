@@ -1,0 +1,23 @@
+MERUNO Update 50 — Phase 6D1 Reception Appointment Check-in
+
+Route:
+POST /api/reception/appointments/:appointmentId/check-in
+
+Adds:
+- Reception permission and active Reception role checks.
+- Two-distinct-element identity verification against the linked active Patient.
+- Failed identity attempts are recorded without saving submitted identifier values and without creating a QueueEntry.
+- Guest check-in only after Reception has linked the guest booking to the exact Patient.
+- Cairo-local appointment-day restriction.
+- Fifteen-minute early-arrival target is informational; the ten-minute grace period is inclusive.
+- Explicit Reception acceptance required after the grace period; no automatic cancellation or NO_SHOW.
+- Atomic CONFIRMED -> CHECKED_IN transition, QueueEntry(APPOINTMENT, WAITING), status history, and PII-minimal audit.
+- Per-doctor/Cairo-local-day queue allocation protected by a DoctorProfile row lock.
+
+Expected verification from Update 49 baseline:
+- 528 Unit Tests across 59 files.
+- 72 Playwright E2E tests.
+- Typecheck, ESLint, and production build pass.
+
+No schema, migration, seed, dependency, package, environment, or configuration changes.
+Local project tests and production build have not been executed in the patch-preparation environment.

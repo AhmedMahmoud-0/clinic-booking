@@ -42,6 +42,36 @@ enum PatientContactType {
   EMAIL
 }
 
+enum PatientAddressType {
+  HOME
+  WORK
+  OTHER
+}
+
+enum PatientConsentType {
+  PRIVACY_NOTICE
+  PERSONAL_DATA_PROCESSING
+  GENERAL_TREATMENT
+  EMAIL_COMMUNICATION
+  PHONE_COMMUNICATION
+}
+
+enum PatientConsentDecision {
+  GRANTED
+  REFUSED
+  WITHDRAWN
+}
+
+enum PatientConsentCaptureMethod {
+  WRITTEN
+  VERBAL
+}
+
+enum PatientConsentSignerType {
+  PATIENT
+  LEGAL_GUARDIAN
+}
+
 enum PatientGender {
   MALE
   FEMALE
@@ -57,10 +87,30 @@ enum PatientRelationshipType {
   OTHER
 }
 
+enum PatientGuardianEvidenceType {
+  BIRTH_CERTIFICATE
+  FAMILY_REGISTRY_EXTRACT
+  COURT_ORDER
+  CUSTODY_ORDER
+  OTHER_OFFICIAL_DOCUMENT
+}
+
 enum AppointmentSource {
   PUBLIC_WEBSITE
   PATIENT_PORTAL
   RECEPTION
+}
+
+enum GuestAppointmentResolutionStatus {
+  PENDING_VERIFICATION
+  LINKED
+}
+
+enum PatientAppointmentOverlapReason {
+  CLINIC_DIRECTED_RESCHEDULE
+  CLINICIAN_REQUESTED_FOLLOW_UP
+  PATIENT_REQUESTED_EXCEPTION
+  SAME_DAY_SERVICE_COORDINATION
 }
 
 enum AppointmentStatus {
@@ -261,6 +311,12 @@ enum PregnancyScreeningResult {
   DECLINED
 }
 
+// Physician triage decision at order time; distinct from the formal exam-day screening result.
+enum RadiologyOrderPregnancyAssessment {
+  SCREENING_REQUIRED
+  NOT_INDICATED
+}
+
 enum RadiologyReportStatus {
   DRAFT
   PENDING_APPROVAL
@@ -340,6 +396,8 @@ model Employee {
   createdScheduleExceptions        DoctorScheduleException[] @relation("ScheduleExceptionCreator")
   createdClinicScheduleExceptions  ClinicScheduleException[] @relation("ClinicScheduleExceptionCreator")
   verifiedGuardianRelationships    PatientRelationship[]     @relation("GuardianRelationshipVerifier")
+  deactivatedPatientRelationships   PatientRelationship[]     @relation("PatientRelationshipDeactivator")
+  recordedPatientConsents           PatientConsent[]            @relation("PatientConsentRecorder")
   createdAppointments              Appointment[]              @relation("AppointmentCreator")
   appointmentStatusChanges         AppointmentStatusHistory[] @relation("AppointmentStatusActor")
   createdQueueEntries               QueueEntry[]                @relation("QueueEntryCreator")
@@ -363,6 +421,7 @@ model Employee {
   orderedRadiologyOrders            RadiologyOrder[]              @relation("RadiologyOrderAuthor")
   performedRadiologyExams           RadiologyExam[]               @relation("RadiologyExamPerformer")
   recordedPregnancyScreenings       RadiologyPregnancyScreening[] @relation("PregnancyScreeningRecorder")
+  assessedRadiologyOrderItems       RadiologyOrderItem[]         @relation("RadiologyOrderItemPregnancyAssessor")
   authoredRadiologyReports          RadiologyReport[]             @relation("RadiologyReportAuthor")
   approvedRadiologyReports          RadiologyReport[]             @relation("RadiologyReportApprover")
   radiologyReportReviews            RadiologyReportReview[]       @relation("RadiologyReportReviewer")
@@ -393,6 +452,8 @@ model Employee {
   revokedRoleAssignments EmployeeRoleAssignment[] @relation("EmployeeRoleRevokers")
   requestedPatientAccessGrants PatientAccessGrant[] @relation("PatientAccessGrantEmployeeRequester")
   verifiedPatientAccessGrants PatientAccessGrant[] @relation("PatientAccessGrantVerifier")
+  linkedGuestAppointmentContacts GuestAppointmentContact[] @relation("GuestAppointmentResolver")
+  authorizedPatientOverlapExceptions AppointmentPatientOverlapException[] @relation("PatientOverlapExceptionApprover")
 }
 
 model DoctorProfile {
@@ -543,9 +604,14 @@ model Patient {
   dateOfBirth   DateTime?             @db.Date
   gender        PatientGender?
   isActive      Boolean               @default(true)
+  appointmentScheduleVersion Int      @default(0)
   createdAt     DateTime              @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime              @updatedAt @db.Timestamptz(3)
   contacts      PatientContact[]
+  addresses     PatientAddress[]
+  emergencyContacts PatientEmergencyContact[]
+  consentRecords PatientConsent[] @relation("PatientConsentSubject")
+  consentsSigned PatientConsent[] @relation("PatientConsentSigner")
   relationships PatientRelationship[] @relation("PatientRelationships")
   relatedTo     PatientRelationship[] @relation("RelatedPatients")
   appointmentStatusChanges AppointmentStatusHistory[] @relation("AppointmentStatusPatientActor")
@@ -565,6 +631,8 @@ model Patient {
   accessGrantsAsSubject PatientAccessGrant[] @relation("PatientAccessGrantSubject")
   accessGrantsAsGrantee PatientAccessGrant[] @relation("PatientAccessGrantGrantee")
   approvedAccessGrants PatientAccessGrant[] @relation("PatientAccessGrantPatientApprover")
+  resolvedGuestAppointmentContacts GuestAppointmentContact[] @relation("GuestAppointmentResolvedPatient")
+  appointmentOverlapExceptions AppointmentPatientOverlapException[] @relation("PatientOverlapExceptionPatient")
 }
 
 model PatientContact {
@@ -574,6 +642,7 @@ model PatientContact {
   value            String             @db.VarChar(254)
   normalizedValue  String             @db.VarChar(254)
   isPrimary        Boolean            @default(false)
+  isActive         Boolean            @default(true)
   verifiedAt       DateTime?          @db.Timestamptz(3)
   createdAt        DateTime           @default(now()) @db.Timestamptz(3)
   updatedAt        DateTime           @updatedAt @db.Timestamptz(3)
@@ -584,6 +653,66 @@ model PatientContact {
   @@index([patientId, type, isPrimary])
 }
 
+
+model PatientAddress {
+  id            String            @id @default(cuid())
+  patientId     String
+  type          PatientAddressType @default(HOME)
+  addressLine1  String            @db.VarChar(180)
+  addressLine2  String?           @db.VarChar(180)
+  district      String?           @db.VarChar(100)
+  city          String            @db.VarChar(100)
+  governorate   String            @db.VarChar(100)
+  postalCode    String?           @db.VarChar(20)
+  countryCode   String            @default("EG") @db.Char(2)
+  isPrimary     Boolean           @default(false)
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime          @updatedAt @db.Timestamptz(3)
+  patient       Patient           @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+  @@index([patientId, isActive, isPrimary])
+  @@index([patientId, city, governorate])
+}
+
+model PatientEmergencyContact {
+  id                 String                  @id @default(cuid())
+  patientId          String
+  fullName           String                  @db.VarChar(180)
+  relationshipType   PatientRelationshipType
+  phone              String                  @db.VarChar(30)
+  normalizedPhone    String                  @db.VarChar(15)
+  isPrimary          Boolean                 @default(false)
+  isActive           Boolean                 @default(true)
+  createdAt          DateTime                @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime                @updatedAt @db.Timestamptz(3)
+  patient            Patient                 @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+  @@index([patientId, isActive, isPrimary])
+  @@index([patientId, normalizedPhone])
+}
+
+model PatientConsent {
+  id                  String                      @id @default(cuid())
+  patientId           String
+  consentType         PatientConsentType
+  decision            PatientConsentDecision
+  captureMethod       PatientConsentCaptureMethod
+  documentVersion     String                      @db.VarChar(40)
+  signerPatientId     String
+  signerType          PatientConsentSignerType
+  signerNameSnapshot  String                      @db.VarChar(220)
+  recordedByEmployeeId String
+  recordedAt          DateTime                    @default(now()) @db.Timestamptz(3)
+  patient             Patient                     @relation("PatientConsentSubject", fields: [patientId], references: [id], onDelete: Restrict)
+  signerPatient       Patient                     @relation("PatientConsentSigner", fields: [signerPatientId], references: [id], onDelete: Restrict)
+  recordedByEmployee  Employee                    @relation("PatientConsentRecorder", fields: [recordedByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([patientId, consentType, recordedAt])
+  @@index([signerPatientId, recordedAt])
+  @@index([recordedByEmployeeId, recordedAt])
+}
+
 model PatientRelationship {
   id                           String                  @id @default(cuid())
   patientId                    String
@@ -592,14 +721,26 @@ model PatientRelationship {
   isLegalGuardian              Boolean                 @default(false)
   guardianVerifiedAt           DateTime?               @db.Timestamptz(3)
   guardianVerifiedByEmployeeId String?
-  createdAt                    DateTime                @default(now()) @db.Timestamptz(3)
+  guardianEvidenceType         PatientGuardianEvidenceType?
+  guardianEvidenceAttachmentId String?                   @unique
+  guardianVerificationLegacy   Boolean                   @default(false)
+  isActive                     Boolean                   @default(true)
+  deactivatedAt                DateTime?                 @db.Timestamptz(3)
+  deactivatedByEmployeeId      String?
+  createdAt                    DateTime                  @default(now()) @db.Timestamptz(3)
+  updatedAt                    DateTime                  @default(now()) @updatedAt @db.Timestamptz(3)
   patient                      Patient                 @relation("PatientRelationships", fields: [patientId], references: [id], onDelete: Restrict)
   relatedPatient               Patient                 @relation("RelatedPatients", fields: [relatedPatientId], references: [id], onDelete: Restrict)
   guardianVerifiedBy           Employee?               @relation("GuardianRelationshipVerifier", fields: [guardianVerifiedByEmployeeId], references: [id], onDelete: Restrict)
+  guardianEvidenceAttachment   Attachment?             @relation("PatientGuardianEvidence", fields: [guardianEvidenceAttachmentId], references: [id], onDelete: Restrict)
+  deactivatedBy                Employee?                @relation("PatientRelationshipDeactivator", fields: [deactivatedByEmployeeId], references: [id], onDelete: Restrict)
 
   @@unique([patientId, relatedPatientId])
   @@index([relatedPatientId, isLegalGuardian])
   @@index([guardianVerifiedByEmployeeId])
+  @@index([deactivatedByEmployeeId])
+  @@index([patientId, createdAt])
+  @@index([patientId, isActive, createdAt])
   accessGrants PatientAccessGrant[]
 }
 
@@ -611,7 +752,7 @@ model PatientRelationship {
 model Appointment {
   id                   String            @id @default(cuid())
   bookingReference     String            @unique @db.VarChar(24)
-  patientId            String
+  patientId            String?
   doctorId             String
   doctorServiceId      String
   consultationRoomId   String?
@@ -632,7 +773,8 @@ model Appointment {
   createdAt            DateTime          @default(now()) @db.Timestamptz(3)
   updatedAt            DateTime          @updatedAt @db.Timestamptz(3)
 
-  patient              Patient           @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  patient              Patient?          @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  guestContact         GuestAppointmentContact?
   doctorService        DoctorService     @relation(fields: [doctorServiceId, doctorId], references: [id, doctorId], onDelete: Restrict)
   consultationRoom     ConsultationRoom? @relation(fields: [consultationRoomId], references: [id], onDelete: Restrict)
   createdByEmployee    Employee?         @relation("AppointmentCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
@@ -640,6 +782,8 @@ model Appointment {
   queueEntry           QueueEntry?
   identityVerifications IdentityVerification[]
   encounter            Encounter?
+  patientOverlapExceptionsGranted AppointmentPatientOverlapException[] @relation("PatientOverlapExceptionSubject")
+  patientOverlapExceptionsAgainst AppointmentPatientOverlapException[] @relation("PatientOverlapExceptionConflict")
 
   complaints Complaint[]
   @@index([patientId, startsAt])
@@ -647,6 +791,56 @@ model Appointment {
   @@index([consultationRoomId, startsAt, endsAt])
   @@index([status, startsAt])
   @@index([createdByEmployeeId])
+}
+
+model AppointmentPatientOverlapException {
+  id                         String                              @id @default(cuid())
+  appointmentId              String
+  conflictingAppointmentId   String
+  patientId                  String
+  authorizedByEmployeeId     String
+  reasonCode                 PatientAppointmentOverlapReason
+  appointmentStartsAt        DateTime                            @db.Timestamptz(3)
+  appointmentEndsAt          DateTime                            @db.Timestamptz(3)
+  conflictingStartsAt        DateTime                            @db.Timestamptz(3)
+  conflictingEndsAt          DateTime                            @db.Timestamptz(3)
+  transactionId              BigInt                              @default(dbgenerated("txid_current()")) @db.BigInt
+  createdAt                  DateTime                            @default(dbgenerated("transaction_timestamp()")) @db.Timestamptz(6)
+
+  appointment                Appointment                         @relation("PatientOverlapExceptionSubject", fields: [appointmentId], references: [id], onDelete: Restrict, map: "AppointmentPatientOverlapException_subject_fkey")
+  conflictingAppointment     Appointment                         @relation("PatientOverlapExceptionConflict", fields: [conflictingAppointmentId], references: [id], onDelete: Restrict, map: "AppointmentPatientOverlapException_conflict_fkey")
+  patient                    Patient                             @relation("PatientOverlapExceptionPatient", fields: [patientId], references: [id], onDelete: Restrict, map: "AppointmentPatientOverlapException_patient_fkey")
+  authorizedByEmployee       Employee                            @relation("PatientOverlapExceptionApprover", fields: [authorizedByEmployeeId], references: [id], onDelete: Restrict, map: "AppointmentPatientOverlapException_actor_fkey")
+
+  @@unique([appointmentId, conflictingAppointmentId, transactionId], map: "AppointmentPatientOverlapException_pair_transaction_key")
+  @@index([patientId, createdAt], map: "AppointmentPatientOverlapException_patient_createdAt_idx")
+  @@index([authorizedByEmployeeId, createdAt], map: "AppointmentPatientOverlapException_actor_createdAt_idx")
+  @@index([conflictingAppointmentId, createdAt], map: "AppointmentPatientOverlapException_conflict_createdAt_idx")
+}
+
+model GuestAppointmentContact {
+  id                    String                          @id @default(cuid())
+  appointmentId         String                          @unique
+  fullName              String                          @db.VarChar(180)
+  phone                 String                          @db.VarChar(30)
+  normalizedPhone       String                          @db.VarChar(15)
+  email                 String?                         @db.VarChar(254)
+  resolutionStatus      GuestAppointmentResolutionStatus @default(PENDING_VERIFICATION)
+  resolvedPatientId     String?
+  resolvedByEmployeeId  String?
+  resolvedAt            DateTime?                       @db.Timestamptz(3)
+  manageTokenHash       String                          @unique @db.Char(64)
+  manageTokenIssuedAt   DateTime                        @default(now()) @db.Timestamptz(3)
+  createdAt             DateTime                        @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime                        @updatedAt @db.Timestamptz(3)
+
+  appointment           Appointment                     @relation(fields: [appointmentId], references: [id], onDelete: Restrict)
+  resolvedPatient       Patient?                        @relation("GuestAppointmentResolvedPatient", fields: [resolvedPatientId], references: [id], onDelete: Restrict)
+  resolvedByEmployee    Employee?                       @relation("GuestAppointmentResolver", fields: [resolvedByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([normalizedPhone, createdAt])
+  @@index([resolutionStatus, createdAt])
+  @@index([resolvedPatientId, resolvedAt])
 }
 
 model ConsultationRoom {
@@ -871,22 +1065,26 @@ model Prescription {
 }
 
 model PrescriptionItem {
-  id             String       @id @default(cuid())
-  prescriptionId String
-  medicationName String       @db.VarChar(180)
-  strength       String?      @db.VarChar(100)
-  dosage         String       @db.VarChar(180)
-  route          String?      @db.VarChar(80)
-  frequency      String       @db.VarChar(180)
-  durationDays   Int?
-  quantity       Decimal?     @db.Decimal(10, 2)
-  quantityUnit   String?      @db.VarChar(40)
-  refills        Int          @default(0)
-  instructions   String?      @db.VarChar(1000)
-  sortOrder      Int          @default(0)
-  createdAt      DateTime     @default(now()) @db.Timestamptz(3)
+  id                    String       @id @default(cuid())
+  prescriptionId        String
+  medicationName        String       @db.VarChar(180)
+  strength              String?      @db.VarChar(100)
+  dosage                String       @db.VarChar(180)
+  route                 String?      @db.VarChar(80)
+  frequency             String       @db.VarChar(180)
+  durationDays          Int?
+  quantity              Decimal?     @db.Decimal(10, 2)
+  quantityUnit          String?      @db.VarChar(40)
+  isPrn                 Boolean      @default(false)
+  prnMaxQuantityPerDose Decimal?     @db.Decimal(10, 2)
+  prnMaxDoseUnit        String?      @db.VarChar(40)
+  prnMaxDosesPerDay     Int?
+  refills               Int          @default(0)
+  instructions          String?      @db.VarChar(1000)
+  sortOrder             Int          @default(0)
+  createdAt             DateTime     @default(now()) @db.Timestamptz(3)
 
-  prescription   Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Restrict)
+  prescription          Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Restrict)
 
   @@index([prescriptionId, sortOrder])
 }
@@ -1222,17 +1420,23 @@ model RadiologyOrderItem {
   status              RadiologyOrderItemStatus  @default(PENDING)
   priceSnapshot       Decimal                   @db.Decimal(10, 2)
   currencyCode        String                    @default("EGP") @db.Char(3)
-  instructions        String?                   @db.VarChar(1000)
-  createdAt           DateTime                  @default(now()) @db.Timestamptz(3)
-  updatedAt           DateTime                  @updatedAt @db.Timestamptz(3)
+  instructions                         String?                   @db.VarChar(1000)
+  preOrderPregnancyAssessment          RadiologyOrderPregnancyAssessment?
+  preOrderPregnancyAssessmentNotes     String?                   @db.VarChar(1000)
+  preOrderPregnancyAssessedByEmployeeId String?
+  preOrderPregnancyAssessedAt          DateTime?                 @db.Timestamptz(3)
+  createdAt                            DateTime                  @default(now()) @db.Timestamptz(3)
+  updatedAt                            DateTime                  @updatedAt @db.Timestamptz(3)
 
-  radiologyOrder      RadiologyOrder            @relation(fields: [radiologyOrderId], references: [id], onDelete: Restrict)
-  procedure           RadiologyProcedure        @relation(fields: [procedureId], references: [id], onDelete: Restrict)
+  radiologyOrder                       RadiologyOrder            @relation(fields: [radiologyOrderId], references: [id], onDelete: Restrict)
+  procedure                            RadiologyProcedure        @relation(fields: [procedureId], references: [id], onDelete: Restrict)
+  preOrderPregnancyAssessedByEmployee  Employee?                 @relation("RadiologyOrderItemPregnancyAssessor", fields: [preOrderPregnancyAssessedByEmployeeId], references: [id], onDelete: Restrict)
   exam                RadiologyExam?
 
   invoiceItems InvoiceItem[]
   @@index([radiologyOrderId, status])
   @@index([procedureId, createdAt])
+  @@index([preOrderPregnancyAssessedByEmployeeId, preOrderPregnancyAssessedAt])
 }
 
 model RadiologyExam {
@@ -1743,6 +1947,7 @@ model Attachment {
   complaint             Complaint?       @relation(fields: [complaintId], references: [id], onDelete: Restrict)
   incidentReport        IncidentReport?  @relation(fields: [incidentReportId], references: [id], onDelete: Restrict)
   uploadedByEmployee    Employee?        @relation("AttachmentUploader", fields: [uploadedByEmployeeId], references: [id], onDelete: SetNull)
+  guardianVerificationFor PatientRelationship? @relation("PatientGuardianEvidence")
 
   @@index([patientId, uploadedAt])
   @@index([encounterId, uploadedAt])

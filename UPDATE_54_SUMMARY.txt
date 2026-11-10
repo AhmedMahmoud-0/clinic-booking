@@ -1,0 +1,18 @@
+MERUNO Update 54 — Phase 7A Doctor Queue Worklist
+
+Adds a protected read-only API:
+GET /api/doctor/queue
+
+- Requires the existing clinical.assigned.read permission.
+- Resolves the DoctorProfile from the authenticated Employee; no caller-supplied doctorId is accepted or used.
+- Rechecks active Employee status, active DOCTOR role assignment, and linked DoctorProfile inside a Repeatable Read transaction.
+- Returns only the current Africa/Cairo local-day QueueEntry rows for the authenticated doctor's profile.
+- Returns queue state/timestamps, waiting minutes for WAITING/CALLED, minimal patient display name/MRN/active flag, linked appointment status/time, and existing Encounter status/timestamps.
+- Does not return patient contacts, date of birth, reason for visit, clinical notes, diagnoses, prescriptions, or diagnostic results.
+- Does not create an Encounter, move a QueueEntry, or implement any clinical action.
+
+New tests: 6 unit tests and 2 E2E tests.
+
+No schema, migration, seed, Prisma generation, dependency, package script, or environment change.
+
+Patch preparation only: the complete local project is not present in this preparation environment, so full-project typecheck, lint, Vitest, Playwright, and production build were not run here. Run the project's five local checks after applying.

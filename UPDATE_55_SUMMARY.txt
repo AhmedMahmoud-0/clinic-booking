@@ -1,0 +1,24 @@
+MERUNO Update 55 — Phase 7B Doctor Starts a Consultation
+
+Adds a protected Doctor operation:
+POST /api/doctor/queue/:queueEntryId/start
+
+- Requires the existing clinical.encounter.manage permission.
+- Accepts only an empty JSON object, rejects query parameters, and never accepts caller-supplied patient, appointment, doctor, encounter, status, timestamp, or actor values.
+- Rechecks the authenticated employee's active status, active DOCTOR role assignment, and linked DoctorProfile inside the transaction.
+- Uses the shared DoctorProfile row mutex, then locks the exact Doctor queue ticket and its appointment if present.
+- Restricts start to the current Africa/Cairo queue date, the authenticated Doctor's own ticket, an active patient, and a CALLED queue state.
+- Appointment queue tickets must match the same patient and doctor and link to a CHECKED_IN appointment with a valid check-in timestamp; walk-ins must not have an appointment.
+- Prevents two simultaneously IN_SERVICE tickets for the same Doctor.
+- Creates one IN_PROGRESS Encounter and transitions the queue ticket to IN_SERVICE atomically in a Serializable transaction.
+- Appointment encounters link through appointmentId only and transition the appointment to IN_CONSULTATION with a STAFF status-history row. Walk-in encounters link through queueEntryId only.
+- Writes a PII-minimal DOCTOR_ENCOUNTER_STARTED audit event.
+- Repeated requests for the same already-started visit return ALREADY_STARTED without creating a duplicate Encounter or audit event.
+- Updates Doctor worklist Encounter projection to read appointment-origin and walk-in-origin Encounters through the correct relation.
+
+New tests: 20 unit tests and 3 E2E tests.
+Expected totals from the developer-confirmed Update 54 baseline: 613 unit tests and 89 E2E tests.
+
+No schema, migration, seed, Prisma generation, dependency, package script, or environment change.
+
+Patch preparation only: the complete local project is not present in this preparation environment, so the full project typecheck, lint, Vitest, Playwright, and production build were not run here. Run the project's five local checks after applying.

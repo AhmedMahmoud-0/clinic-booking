@@ -1,0 +1,8 @@
+Update 64 — Phase 7K Doctor Clinical-Note Signing
+
+Adds POST /api/doctor/encounters/:encounterId/clinical-note/sign.
+Uses existing ClinicalNote status and signedAt fields. The original Doctor author signs the single initial-assessment draft on their active Encounter. Requires chief complaint and at least one SOAP section, sets signature time on the server, and writes an atomic minimal AuditLog event. The Encounter remains IN_PROGRESS.
+
+No schema or migration change.
+
+Expected test totals from Update 63 baseline: 901 Unit tests in 85 files; 124 E2E tests.

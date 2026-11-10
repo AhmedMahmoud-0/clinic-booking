@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   CLINIC_TIME_ZONE,
+  fromClinicLocalDateTime,
   toClinicLocalDateTime,
 } from "../../src/lib/clinic-time";
 
@@ -20,10 +21,38 @@ describe("MERUNO clinic-local time conversion", () => {
     });
   });
 
-  it("rejects invalid date values rather than using the host timezone", () => {
+  it("rejects invalid Date values rather than using the host timezone", () => {
     expect(() => toClinicLocalDateTime(new Date(Number.NaN))).toThrow(
       "A valid Date instance is required.",
     );
   });
-}
-);
+
+  it("converts a clinic-local winter time to its correct UTC instant", () => {
+    expect(fromClinicLocalDateTime("2026-01-05", 495)?.toISOString()).toBe(
+      "2026-01-05T06:15:00.000Z",
+    );
+  });
+
+  it("converts a clinic-local summer time without relying on the host timezone", () => {
+    expect(fromClinicLocalDateTime("2026-07-01", 495)?.toISOString()).toBe(
+      "2026-07-01T05:15:00.000Z",
+    );
+  });
+
+  it("treats minute 1440 as midnight at the start of the next clinic day", () => {
+    expect(fromClinicLocalDateTime("2026-01-05", 1440)?.toISOString()).toBe(
+      "2026-01-05T22:00:00.000Z",
+    );
+  });
+
+  it("advances to the first real local minute when Cairo skips midnight for daylight saving", () => {
+    const instant = fromClinicLocalDateTime("2026-04-24", 0);
+    expect(instant?.toISOString()).toBe("2026-04-23T22:00:00.000Z");
+    expect(instant ? toClinicLocalDateTime(instant).localTime : null).toBe("01:00");
+  });
+
+  it("rejects impossible dates and invalid minute values", () => {
+    expect(() => fromClinicLocalDateTime("2026-02-30", 600)).toThrow();
+    expect(() => fromClinicLocalDateTime("2026-01-05", 1441)).toThrow();
+  });
+});

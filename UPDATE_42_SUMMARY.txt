@@ -1,0 +1,14 @@
+MERUNO Update 42 — Phase 6B3A Reception Booking
+
+Purpose:
+- Add an authorized Reception endpoint to book appointments for existing active Patient records.
+- Reuse the verified availability calculation and serializable booking transaction.
+- Record RECEPTION source, employee creator, STAFF status-history actor, and a minimal audit event.
+
+Safety:
+- Recheck active Employee and active RECEPTION role assignment inside the transaction.
+- Preserve exact-slot, doctor/service, patient overlap, and room checks.
+- No guest linking, no patient-overlap override, no schema/migration/dependency changes.
+
+Files: 7 added, 3 replaced.
+Expected verification baseline: 390 unit tests, 51 E2E tests, plus typecheck, lint, production build.

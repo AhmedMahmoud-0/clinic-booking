@@ -1,0 +1,17 @@
+MERUNO Update 62 — Phase 7I Doctor Referral Inbox and Lifecycle
+
+Adds a restricted Doctor referral inbox and lifecycle transition API using the existing Referral model and ReferralStatus enum.
+
+New endpoints:
+- GET /api/doctor/referrals/inbox
+- POST /api/doctor/referrals/[referralId] with action ACCEPT, COMPLETE, or CANCEL.
+
+Internal referrals can be accepted/completed by the explicitly targeted active Doctor or an active Doctor in the assigned specialty when no Doctor ID was set. Only the originating Doctor employee can cancel an open referral. External referrals cannot be accepted/completed in the internal clinic workspace and can only be cancelled by their author while open.
+
+The existing enum is PENDING, ACCEPTED, COMPLETED, CANCELLED. There is no REJECTED value; this update does not add or infer one. Specialty-only referrals remain team-owned because Referral has no acceptedByEmployeeId column; the API does not claim exclusive ownership by the first Doctor who accepts.
+
+All lifecycle writes lock the Referral row and update status plus a PII-minimal AuditLog event in one Serializable transaction. Inbox responses contain minimal patient identity only; no DOB, contact details, full clinical chart, diagnoses, or notes.
+
+No schema change, migration, seed, package, dependency, environment, or UI change is included.
+
+Expected incremental tests: 33 Unit tests (26 lifecycle-policy + 7 validation) and 4 E2E authorization-boundary tests. Against the confirmed Update 61 baseline of 836 Unit tests and 112 E2E tests, expected totals are 869 Unit tests and 116 E2E tests, assuming no unrelated tests were added or removed. Local execution is required to confirm actual results.

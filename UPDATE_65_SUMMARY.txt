@@ -1,0 +1,10 @@
+MERUNO Update 65 — Phase 7L: Doctor Clinical-Note Amendments
+
+Adds protected GET/POST endpoints for the original Doctor to read and append corrections to their own signed INITIAL_ASSESSMENT note.
+
+The existing ClinicalAmendment model is reused. Previous and corrected clinical-note snapshots are stored as versioned JSON in previousContent/correctedContent. The signed ClinicalNote row is never rewritten. The service validates the amendment chain, locks Encounter then ClinicalNote, uses a Serializable transaction for new amendments, and writes an audit event atomically without copying clinical content or the amendment reason into the audit row.
+
+New tests: 19 policy + 8 validation unit tests, and 4 Playwright E2E boundary tests.
+Expected totals after applying: 928 unit tests across 87 files and 128 E2E tests, assuming no unrelated test changes.
+
+No Prisma schema, migration, seed, package, dependency, environment, or UI change is included.

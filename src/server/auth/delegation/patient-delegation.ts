@@ -27,6 +27,7 @@ const verifiedPatientSelect = {
 
 const relationshipSelect = {
   relationshipType: true,
+  isActive: true,
   isLegalGuardian: true,
   guardianVerifiedAt: true,
   guardianVerifiedByEmployeeId: true,
@@ -108,6 +109,7 @@ function ensurePatientsCanBeDelegated(
   grantee: VerifiedPatientRecord,
   relationship: {
     relationshipType: string;
+    isActive: boolean;
     isLegalGuardian: boolean;
     guardianVerifiedAt: Date | null;
     guardianVerifiedByEmployeeId: string | null;
@@ -130,7 +132,7 @@ function ensurePatientsCanBeDelegated(
     );
   }
 
-  if (!relationship) {
+  if (!relationship || !relationship.isActive) {
     throw new AccountLinkError(
       "PATIENT_RELATIONSHIP_REQUIRED",
       "A verified patient relationship record is required before access can be delegated.",
@@ -330,6 +332,7 @@ export async function listPatientAccessGrants(subjectPatientId: string): Promise
     id: string;
     grantee: { id: string; firstName: string; lastName: string };
     relationshipType: string;
+    isActive: boolean;
     isLegalGuardian: boolean;
     status: string;
     scopes: PatientAccessScope[];
@@ -370,7 +373,7 @@ export async function listPatientAccessGrants(subjectPatientId: string): Promise
       revokedAt: true,
       reason: true,
       granteePatient: { select: { id: true, firstName: true, lastName: true } },
-      relationship: { select: { relationshipType: true, isLegalGuardian: true } },
+      relationship: { select: { relationshipType: true, isActive: true, isLegalGuardian: true } },
       permissions: { select: { scope: true } },
     },
   });
@@ -381,6 +384,7 @@ export async function listPatientAccessGrants(subjectPatientId: string): Promise
       id: record.id,
       grantee: record.granteePatient,
       relationshipType: record.relationship.relationshipType,
+      isActive: record.relationship.isActive,
       isLegalGuardian: record.relationship.isLegalGuardian,
       status:
         (record.status === "ACTIVE" || record.status === "PENDING") &&
@@ -407,6 +411,7 @@ export async function listPatientDelegationsForActor(patientId: string): Promise
     subject: { id: string; firstName: string; lastName: string };
     grantee: { id: string; firstName: string; lastName: string };
     relationshipType: string;
+    isActive: boolean;
     isLegalGuardian: boolean;
     status: string;
     scopes: PatientAccessScope[];
@@ -434,7 +439,7 @@ export async function listPatientDelegationsForActor(patientId: string): Promise
       revokedAt: true,
       subjectPatient: { select: { id: true, firstName: true, lastName: true, dateOfBirth: true } },
       granteePatient: { select: { id: true, firstName: true, lastName: true } },
-      relationship: { select: { relationshipType: true, isLegalGuardian: true } },
+      relationship: { select: { relationshipType: true, isActive: true, isLegalGuardian: true } },
       permissions: { select: { scope: true } },
     },
   });
@@ -456,6 +461,7 @@ export async function listPatientDelegationsForActor(patientId: string): Promise
         subject: record.subjectPatient,
         grantee: record.granteePatient,
         relationshipType: record.relationship.relationshipType,
+        isActive: record.relationship.isActive,
         isLegalGuardian: record.relationship.isLegalGuardian,
         status,
         scopes: record.permissions.map((permission) => permission.scope as PatientAccessScope),
