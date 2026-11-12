@@ -69,10 +69,11 @@ The developer confirmed Update 22 Fix 01 passed all five local checks and closed
 | 7I | Doctor referral inbox/lifecycle | Complete — Update 62; 869 unit tests across 82 files, 116 E2E tests, typecheck, lint, and production build passed |
 | 7J | Doctor prescription issuance | Complete — Update 63; developer confirmed 880 unit tests across 83 files, 120 E2E tests, typecheck, lint, and production build passed |
 | 7K | Doctor clinical-note signing | Complete — Update 64; developer confirmed 901 unit tests across 85 files, 124 E2E tests, typecheck, lint, and production build passed |
-| 7L | Doctor clinical-note amendments | Current increment — Update 65 appends versioned correction snapshots to the existing ClinicalAmendment model without rewriting the signed note; local verification pending |
-| Phase 7 remaining | Vital signs, prescription correction/version history, referral follow-up, Nurse workflows, Encounter completion, and Doctor/Nurse UIs | Planned |
+| 7L | Doctor clinical-note amendments | Complete and locally verified — Update 65; 928 unit tests across 87 files, 128 E2E tests, typecheck, lint, and production build passed |
+| 7M | Nursing task workflow, VitalSign recording, escalation, and Encounter completion | Current increment — Update 66; Migration 13 is required and local verification is pending |
+| Phase 7 remaining | Prescription correction/version history, referral follow-up, Doctor/Nurse UIs, and complete cross-workspace UI integration | Planned |
 | 8 | Laboratory and radiology workflows | Not started |
-| 9 | Billing and payments | Not started |
+| 9 | Billing and payments | Update 71 Phase 9A locally verified; Update 72 Phase 9B prepared, local verification pending |
 | 10 | Complete public website and patient portal | Only the Phase 1 public shell exists; complete pages and portal workflows are pending |
 | 11 | Clinic management and system administration | Not started |
 | 12 | Integrated testing and release | Not started |
@@ -587,7 +588,7 @@ Nurses record vitals and assigned tasks and escalate concerns to a doctor. Nurse
 
 - Add `GET /api/doctor/lab-catalog` (existing `clinical.order.create`) to search active `LabTest` catalog entries (maximum 30), plus `GET /api/doctor/encounters/:encounterId/lab-orders` (`clinical.assigned.read`) and `POST` (`clinical.order.create`) for the authenticated Doctor's own active Encounter.
 - Inside the server service, re-resolve an active Employee with an active `DOCTOR` assignment and linked DoctorProfile; the caller cannot select a doctor, employee, patient, author, status, catalog label, price, currency, or order reference. Catalog search and order creation require `clinical.order.create`; Encounter order history requires `clinical.assigned.read`.
-- Recheck Encounter ownership, `IN_PROGRESS` state, absence of a completion timestamp, and the Phase 7 visit-origin invariant inside a Repeatable Read read or Serializable write transaction. Appointment Encounters must remain linked only through the matching Appointment in `IN_CONSULTATION`; walk-in Encounters must remain linked only through the matching `WALK_IN` QueueEntry in `IN_SERVICE`.
+- Recheck Encounter ownership, `IN_PROGRESS` state, absence of a completion timestamp, and the Phase 7 visit-origin invariant inside a Repeatable Read read or Serializable write transaction. Appointment Encounters remain linked through the matching Appointment in `IN_CONSULTATION` with `Encounter.queueEntryId = null`, and that Appointment must have its matching `APPOINTMENT` QueueEntry in `IN_SERVICE`; walk-in Encounters remain linked through the matching `WALK_IN` QueueEntry in `IN_SERVICE`.
 - Create an immediately `ORDERED` `LabOrder` with 1–20 distinct active catalog test IDs. New `LabOrderItem` rows begin as `PENDING`. Prices and currency codes are copied from the active catalog into item snapshots; unsupported/inactive catalog IDs fail closed. Priority is limited to `ROUTINE` or `URGENT`; clinical notes are bounded optional text.
 - Order references are generated server-side. The service locks the Encounter before writes and uses a Serializable transaction so the Encounter, selected active catalog entries, order header, items, and audit event commit atomically. Concurrency conflicts return a safe 409 response.
 - Audit `DOCTOR_LAB_ORDER_CREATED` with the actor, order/Encounter references, item count, and priority only. Do not copy test labels, patient identifiers, or clinical notes into the audit log.
@@ -648,7 +649,7 @@ Nurses record vitals and assigned tasks and escalate concerns to a doctor. Nurse
 
 ### Phase 7K — Doctor clinical-note signing (Update 64)
 
-**Status: implementation prepared; local verification pending.** This is a server-side API/data-layer increment and reuses the Phase 2B `ClinicalNote` status and `signedAt` fields. No schema or migration change is included.
+**Status: complete and locally verified.** The developer confirmed Update 64 passed typecheck, lint, 901 unit tests across 85 files, 124 Playwright E2E tests, and production build. This is a server-side API/data-layer increment and reuses the Phase 2B `ClinicalNote` status and `signedAt` fields. No schema or migration change is included.
 
 - Add `POST /api/doctor/encounters/:encounterId/clinical-note/sign`, protected by `clinical.encounter.manage`, same-origin validation, JSON-only body, no query parameters, and a strict empty-object request. The caller cannot choose note ID, author, signer, status, signature time, clinical content, or Encounter status.
 - Recheck the active Employee, active `DOCTOR` role assignment, linked DoctorProfile, Encounter ownership, `IN_PROGRESS` state, absence of `completedAt`, and consistent appointment (`IN_CONSULTATION`) or walk-in (`IN_SERVICE`) visit origin inside a Serializable transaction.
@@ -661,7 +662,7 @@ Nurses record vitals and assigned tasks and escalate concerns to a doctor. Nurse
 
 ### Phase 7L — Doctor clinical-note amendments (Update 65)
 
-**Status: implementation prepared; local verification pending.** This is a protected API/data-layer increment. It reuses the Phase 2B `ClinicalAmendment` model (`clinicalNoteId`, `previousContent`, `correctedContent`, `reason`, `createdByEmployeeId`, and `createdAt`). No schema or migration change is included.
+**Status: complete and locally verified.** The developer confirmed Update 65 passed typecheck, lint, 928 unit tests across 87 files, 128 Playwright E2E tests, and production build. This is a protected API/data-layer increment. It reuses the Phase 2B `ClinicalAmendment` model (`clinicalNoteId`, `previousContent`, `correctedContent`, `reason`, `createdByEmployeeId`, and `createdAt`). No schema or migration change is included.
 
 - Add `GET /api/doctor/encounters/:encounterId/clinical-note/amendments`, protected by `clinical.assigned.read`, to return the original signed initial-assessment snapshot, the latest effective corrected snapshot, and the append-only amendment history.
 - Add `POST` on the same route, protected by `clinical.encounter.manage`, same-origin validation, JSON-only body, no query parameters, and a strict request containing a bounded reason and at least one supported correction field.
@@ -672,18 +673,72 @@ Nurses record vitals and assigned tasks and escalate concerns to a doctor. Nurse
 - A repeated correction that does not change the effective content returns `UNCHANGED` and creates no amendment or audit row. In-progress and completed Encounters are eligible only when their completion timestamp and appointment/walk-in origin state are consistent; cancelled or inconsistent Encounters are rejected.
 - No prescription correction/version history, diagnosis amendment, referral follow-up, vital-sign workflow, Nurse task workflow, Encounter completion, Doctor/Nurse UI, patient portal display, schema/migration, seed, dependency, package, or environment change is included.
 
+### Phase 7M — Nursing tasks, vital signs, and Encounter completion (Update 66)
+
+**Status: complete and locally verified after Update 66 + Fix 01.** The developer applied Migration 13, confirmed the database was up to date, and then confirmed typecheck, lint, 990 unit tests, 138 E2E tests, and production build passed. This combined increment adds server-side Nurse task lifecycle, linked vital-sign recording, and Doctor-controlled Encounter completion. It reuses the existing `VitalSign` model and `nursing.context.read`, `nursing.vitals.record`, `nursing.task.manage`, `clinical.assigned.read`, and `clinical.encounter.manage` permissions. No new role or permission is introduced.
+
+- The assigned Doctor may create a bounded task for an active Employee with an active `NURSE` role. Supported tasks: record/repeat vital signs, pre-consultation assessment, procedure preparation, and other documented nursing work.
+- Nurses can list only tasks assigned to their authenticated employee identity. They may start, complete, or escalate their own task. Vital-sign tasks require at least one task-linked `VitalSign` before completion. Nurses cannot diagnose, prescribe, sign notes, resolve escalations, or close Encounters.
+- A Nurse may escalate an in-progress task with a required note. The task is marked `ESCALATED` and the Doctor receives a minimal in-app notification; the clinical note itself is not copied into notification or AuditLog. The Doctor assigned to that Encounter can resume or cancel the escalated task with a recorded reason.
+- Measurements append to the existing `VitalSign` model. The server sets recorder, time, task link, and BMI. Plausibility bounds are data-entry safeguards, not clinical thresholds. No automated abnormal-value classification is introduced; a Nurse manually escalates a concerning reading or symptom under clinic protocol.
+- The Doctor may complete an Encounter only when exactly one signed initial assessment exists and was authored by that Doctor, no nursing task is pending/in-progress/escalated, and no prescription remains a draft. The operation atomically completes the Encounter and its appointment or walk-in queue source, recording appointment history and an audit event. Open diagnostic orders/referrals may remain for post-visit follow-up.
+- All mutating operations lock the Encounter before related task/source rows so task transitions and Encounter completion serialize. Existing VitalSign rows remain unchanged and have `nursingTaskId = NULL` after migration.
+- Migration 13 creates NursingTask enums/table, lifecycle consistency constraints, indexes, employee/Encounter foreign keys, and a nullable VitalSign-to-task link. Do not reset, push, backfill, reseed, or replace migration history.
+- No Doctor/Nurse UI, patient portal display, referral follow-up, prescription correction/versioning, lab/radiology processing, or automated clinical alert thresholds are included.
+
 
 ## Phase 8 — Laboratory and radiology
 
-**Laboratory:** order → patient/sample identity check → collection → receive/accept/reject → processing → result entry → review/approval → release. Critical results require notification, read-back, acknowledgment, and escalation. External laboratory referrals and external patients are included only within the approved medium-clinic requirements and must not turn this into a separate laboratory SaaS.
+**Status: complete and locally verified.** Update 67 completed 8A–8C (Migration 14); Update 68 completed 8D–8E; Update 69 completed 8F–8H (Migration 15); Update 70 completed 8I–8J (Migration 16). The developer confirmed all Update 70 checks passed after Fixes 01–03, including typecheck, lint, unit tests, migration status, Playwright, and production build.
 
-**Radiology:** order → scheduling → identity/preparation → pregnancy screening before X-ray → examination → report draft → radiologist approval → release. Prevent room/equipment conflicts. Only digital X-ray and ultrasound are in scope. Do not add CT, MRI, mammography, echocardiography, PACS, or DICOM integration.
+| Subphase | Scope | Delivery |
+| --- | --- | --- |
+| 8A | Internal Lab Staff worklist, two-element patient identity verification, sample collection | Update 67 |
+| 8B | Sample receipt/rejection, specimen history, and controlled recollection | Update 67 |
+| 8C | Test processing and result draft entry using active test-component snapshots | Update 67 |
+| 8D | Result submission for independent review, approval/rejection, and controlled release | Update 68 |
+| 8E | Critical-result notification, read-back, acknowledgment, escalation, and ordering-Doctor clinical review | Update 68 |
+| 8F | External laboratory referral lifecycle, scoped patient consent, external-provider critical-result read-back, and Reception intake for external patients with a diagnostic-only record type | Update 69 |
+| 8G | Radiology scheduling, active resource/modality validation, configured procedure duration, timezone-aware start time, and database-enforced non-overlapping resource allocation | Update 69 |
+| 8H | Exam-linked two-element patient identity verification, documented preparation outcome, exam-day X-ray pregnancy screening, Radiologist review for positive/declined responses, and a readiness gate before execution | Update 69 |
+| 8I | Readiness-gated exam execution, report drafting, independent Radiologist review/approval, and controlled report release | Update 70 |
+| 8J | Critical-result read-back and escalation, consent-backed external radiology referrals/results, protected delivery to the assigned Doctor, and Doctor clinical review | Update 70 |
+
+**Laboratory workflow:** Doctor order → Lab Staff identity check using two distinct stored patient identity elements → sample collection → sample receipt/acceptance or rejection → processing → draft result entry → submission → independent Lab Staff review → approval or return for correction → controlled release. Critical results require documented communication and ordering-Doctor read-back before release. After release, the ordering Doctor records a clinical review or follow-up decision. Rejected samples remain in history and may be recollected only after the latest sample is rejected. Update 68 reuses existing review, communication, and clinical-review tables; it adds no migration. Update 69 implements external laboratory workflows through two distinct paths: Reception may intake an outside provider request for an existing identity-verified patient or create a short-lived diagnostic-only patient record without creating a clinic Encounter/account; separately, an assigned Doctor may refer an active Encounter to an outside laboratory only after explicit, matching granted data-sharing consent. Lab Staff record received external summaries and the responsible Doctor reviews Encounter-linked referrals; external-intake critical results use a Lab Staff documented external-provider read-back. Diagnostic-only records are blocked from appointments, queue entries, Encounters, patient accounts, and family relationships until Reception re-verifies identity and explicitly converts the record. Radiology scheduling and preparation are delivered in the same update to keep resource allocation, identity, preparation, and X-ray screening state coherent.
+
+**Radiology workflow:** scheduling → identity/preparation → pregnancy screening before X-ray → readiness-gated exam execution → report draft → independent Radiologist review/approval → critical communication/read-back when indicated → controlled release → assigned-Doctor clinical review. Update 70 completes the API/data layer for 8I–8J: start rechecks readiness inside the transaction, exam completion is attributed to Radiology Staff, reports require independent Radiologist approval, and critical reports remain unreleased until all recorded read-back communications are acknowledged. External radiology results use a separate consent-backed Encounter referral/result lifecycle and are never represented as clinic-performed exams. Permissions remain separated between Radiology Staff, Radiologists, and the assigned Doctor. Only digital X-ray and ultrasound are in scope. Do not add CT, MRI, mammography, echocardiography, PACS, or DICOM integration.
+
+**Data and safety boundaries:** use synthetic patient data only. Reuse the existing Phase 5B two-element identity-verification schema and matcher; do not create a second identity-matching implementation. Do not store submitted identity values in notes/audit logs. Keep Lab Staff, Radiology Staff, and Radiologist roles separate. The Phase 8 APIs are data-layer increments; the complete staff workspaces are delivered in the later UI phases.
 
 ## Phase 9 — Billing and payments
+
+**Status: Update 71 / Phase 9A complete and locally verified; Update 72 / Phase 9B implementation prepared, local verification pending.** Update 72 reuses the existing Phase 2D invoice, discount, and refund models and adds only the missing external-intake invoice source and refund execution audit fields through one incremental migration.
+
+| Workstream | Scope | Consolidated delivery |
+| --- | --- | --- |
+| 9A | Encounter-linked draft invoices from completed Appointment, released internal Lab, and completed in-clinic Radiology service snapshots; service-completion gate; invoice issue; one full payment by cash, POS card, or clinic e-wallet | Update 71 |
+| 9B | Discount request/manager decision, approved discount application, refund request/manager decision, item-level refund completion with original payment method and invoice history preserved, and financial reporting | Update 72 |
+| 9C | Cashier invoice/payment/receipt workbench, manager approval workbench, and role-scoped finance reporting | Update 71 and Update 72 |
+| 9D | Diagnostic-only external-intake invoices and walk-in consultation price snapshots, without inventing an Encounter for an external patient | Update 72 |
 
 Support multi-item invoices and full payment only after service. Accepted methods: cash, POS card, and clinic-supported electronic wallets. No online payment gateway, installments, partial payments, or insurance claims.
 
 Discounts require authorized manager approval and a recorded reason. Refunds require manager approval. An unprovided item in a multi-item invoice may be refunded without cancelling other items. Preserve the original invoice and record refund details; never delete or silently overwrite an issued invoice.
+
+Update 71 is limited to Encounter-linked invoices. It includes only services with a completed Appointment snapshot, a released internal Lab result, or a completed in-clinic Radiology exam. Drafts are refreshed as services finish; issuance is blocked while related non-cancelled services remain unfinished or the draft does not contain every completed billable item. Diagnostic-only external intake and walk-in consultation price snapshots remain Update 72 scope, rather than inventing a Doctor/Encounter or using a possibly changed catalogue price.
+
+### Phase 9B — Discounts, refunds, external-intake billing, and finance reports (Update 72)
+
+**Status: implementation prepared; local verification pending.** Update 72 includes:
+
+- Cashier discount requests against draft invoices only. Each request records an amount and reason, and a Clinic Manager must approve it before the discount changes the invoice total. A requester cannot decide their own request.
+- Cashier refund requests tied to selected invoice items that are explicitly recorded as not provided. The server calculates the refundable net line amount after allocating invoice-level discounts; the client cannot submit a refund amount. A Clinic Manager must approve or reject the request with a recorded rejection reason. Approved refunds are completed by Cashier using the original payment method; POS/e-wallet refunds require a transaction reference. Original invoices and payment rows remain preserved.
+- A controlled external diagnostic-intake invoice source for the existing ExternalLabIntake model, restricted to released in-clinic laboratory results. Encounter-linked invoices remain unchanged. An invoice must point to exactly one supported source and the patient must match that source.
+- A Walk-in consultation price snapshot selected from the assigned doctor's active consultation services. The chosen price and description are retained on the draft and are not silently refreshed from the current catalogue.
+- Cashier and Clinic Manager workbench components for discount/refund workflows, refund execution, and reporting. The report uses Africa/Cairo date boundaries and separates billed totals, collected payments, refunds, net collection, outstanding issued invoices, and payment methods.
+- One incremental migration adds the optional ExternalLabIntake invoice link and the employee/payment-channel audit fields for completed refunds. It does not delete or rewrite existing billing rows.
+
+No online payment gateway, installments, partial payments, insurance claims, or System Admin financial access is introduced. The UI components accept translation `copy` props so each workspace can reuse the project's existing Arabic/English dictionaries; no new translation system is added.
 
 ## Phase 10 — Public website and patient portal
 

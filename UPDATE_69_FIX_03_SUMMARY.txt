@@ -1,0 +1,7 @@
+MERUNO Update 69 — Fix 03
+
+- Raised patient record conversion reason minimum from 5 to 10 trimmed characters, matching the existing validation test and ensuring the recorded Reception rationale is meaningful.
+- Removed unused intakeOriginSchema from external-lab-validation.ts.
+- Removed unused CollectionItemSource alias from lab-workflow.ts.
+- No database, Prisma schema, migration, package, or environment changes.
+- Expected checks: lint 0 warnings from the two reported locations; Unit Tests 1,138/1,138.

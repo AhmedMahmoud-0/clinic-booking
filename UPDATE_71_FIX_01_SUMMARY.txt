@@ -1,0 +1,11 @@
+MERUNO Update 71 — Fix 01
+Focused React effect/lint repair and Playwright web-server startup diagnostics.
+
+1. CashierInvoiceWorkbench: list loading no longer clears error state synchronously before the first await when invoked from useEffect.
+2. Playwright: webServer timeout raised to 300 seconds; stdout and stderr are both piped so startup readiness/errors are visible.
+3. BETTER_AUTH_URL canonical origin, HTTP/HTTPS choice, hostname/port, ignoreHTTPSErrors, and server reuse behavior retained.
+4. No database, migration, dependency, API, billing-domain, or permission changes.
+
+First rerun:
+  npm run lint
+  npx playwright test --workers=1

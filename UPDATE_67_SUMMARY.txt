@@ -1,0 +1,14 @@
+MERUNO Update 67 — Phase 8A–8C Internal Laboratory Workflow
+
+Adds Lab Staff worklist, reuse of the existing two-element Patient identity verification, sample collection, sample receipt/rejection, history-preserving recollection after rejection, processing start, and draft lab result entry.
+
+Migration 14: 20261110233000_lab_sample_recollection_history
+- Adds LabSample.specimenTypeSnapshot and backfills existing synthetic rows.
+- Replaces one-to-one LabSampleItem.orderItemId uniqueness with a history-friendly index.
+- Preserves per-sample uniqueness and all existing clinical records.
+
+No seed, package, dependency, environment, or UI changes. No approval/release or critical-result communications are included.
+
+Apply instructions: APPLY_UPDATE_67.md
+File-by-file details: UPDATE_67_FILE_GUIDE.md
+Expected tests: 1,034 Unit tests / 93 files; 146 Playwright E2E tests, subject to no unrelated test changes.

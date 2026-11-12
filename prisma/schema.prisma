@@ -54,6 +54,7 @@ enum PatientConsentType {
   GENERAL_TREATMENT
   EMAIL_COMMUNICATION
   PHONE_COMMUNICATION
+  EXTERNAL_DIAGNOSTIC_DATA_SHARING
 }
 
 enum PatientConsentDecision {
@@ -70,6 +71,11 @@ enum PatientConsentCaptureMethod {
 enum PatientConsentSignerType {
   PATIENT
   LEGAL_GUARDIAN
+}
+
+enum PatientRecordType {
+  FULL
+  DIAGNOSTIC_ONLY
 }
 
 enum PatientGender {
@@ -165,6 +171,22 @@ enum EncounterStatus {
   CANCELLED
 }
 
+enum NursingTaskType {
+  RECORD_VITAL_SIGNS
+  REPEAT_VITAL_SIGNS
+  PRE_CONSULTATION_ASSESSMENT
+  PROCEDURE_PREPARATION
+  OTHER
+}
+
+enum NursingTaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ESCALATED
+  CANCELLED
+}
+
 enum ClinicalNoteType {
   INITIAL_ASSESSMENT
   FOLLOW_UP
@@ -199,6 +221,25 @@ enum ReferralStatus {
 // Phase 2C — Laboratory and radiology diagnostic workflows.
 // Schema only. PostgreSQL migrations and database writes remain deferred to 2E.
 // -----------------------------------------------------------------------------
+
+enum ExternalLabIntakeSource {
+  PAPER
+  ELECTRONIC
+}
+
+enum ExternalLabReferralStatus {
+  REFERRED
+  RESULT_RECEIVED
+  REVIEWED
+  CANCELLED
+}
+
+enum RadiologyExamPreparationStatus {
+  PENDING
+  CONFIRMED
+  NOT_REQUIRED
+  ISSUE_REPORTED
+}
 
 enum DiagnosticOrderPriority {
   ROUTINE
@@ -311,6 +352,17 @@ enum PregnancyScreeningResult {
   DECLINED
 }
 
+enum RadiologyPregnancyReviewDecision {
+  AUTHORIZE_AFTER_REVIEW
+  DEFER_EXAM
+}
+
+enum ExternalRadiologyReferralStatus {
+  REFERRED
+  RESULT_RECEIVED
+  REVIEWED
+}
+
 // Physician triage decision at order time; distinct from the formal exam-day screening result.
 enum RadiologyOrderPregnancyAssessment {
   SCREENING_REQUIRED
@@ -405,6 +457,11 @@ model Employee {
   createdEncounters                 Encounter[]                 @relation("EncounterCreator")
   authoredClinicalNotes             ClinicalNote[]              @relation("ClinicalNoteAuthor")
   recordedVitalSigns                VitalSign[]                 @relation("VitalSignRecorder")
+  assignedNursingTasks              NursingTask[]               @relation("NursingTaskAssignee")
+  createdNursingTasks               NursingTask[]               @relation("NursingTaskCreator")
+  completedNursingTasks             NursingTask[]               @relation("NursingTaskCompleter")
+  cancelledNursingTasks             NursingTask[]               @relation("NursingTaskCanceller")
+  resolvedNursingTaskEscalations    NursingTask[]               @relation("NursingTaskEscalationResolver")
   recordedDiagnoses                 EncounterDiagnosis[]        @relation("EncounterDiagnosisAuthor")
   authoredPrescriptions             Prescription[]              @relation("PrescriptionAuthor")
   clinicalAmendments                ClinicalAmendment[]         @relation("ClinicalAmendmentAuthor")
@@ -412,6 +469,12 @@ model Employee {
   orderedLabOrders                  LabOrder[]                   @relation("LabOrderAuthor")
   collectedLabSamples               LabSample[]                  @relation("LabSampleCollector")
   receivedLabSamples                LabSample[]                  @relation("LabSampleReceiver")
+  createdExternalLabIntakes         ExternalLabIntake[]           @relation("ExternalLabIntakeCreator")
+  patientRecordTypeHistoryChanges   PatientRecordTypeHistory[]    @relation("PatientRecordTypeHistoryActor")
+  createdExternalLabReferrals       ExternalLabReferral[]         @relation("ExternalLabReferralCreator")
+  receivedExternalLabReferralResults ExternalLabReferral[]        @relation("ExternalLabReferralResultReceiver")
+  reviewedExternalLabReferrals      ExternalLabReferral[]         @relation("ExternalLabReferralReviewer")
+  cancelledExternalLabReferrals     ExternalLabReferral[]         @relation("ExternalLabReferralCanceller")
   authoredLabResults                LabResult[]                  @relation("LabResultAuthor")
   approvedLabResults                LabResult[]                  @relation("LabResultApprover")
   labResultReviews                  LabResultReview[]             @relation("LabResultReviewer")
@@ -420,7 +483,9 @@ model Employee {
   acknowledgedLabCritical           LabCriticalCommunication[]    @relation("LabCriticalAcknowledger")
   orderedRadiologyOrders            RadiologyOrder[]              @relation("RadiologyOrderAuthor")
   performedRadiologyExams           RadiologyExam[]               @relation("RadiologyExamPerformer")
+  checkedRadiologyPreparations      RadiologyExam[]               @relation("RadiologyExamPreparationChecker")
   recordedPregnancyScreenings       RadiologyPregnancyScreening[] @relation("PregnancyScreeningRecorder")
+  reviewedPregnancyScreenings       RadiologyPregnancyScreening[] @relation("PregnancyScreeningReviewer")
   assessedRadiologyOrderItems       RadiologyOrderItem[]         @relation("RadiologyOrderItemPregnancyAssessor")
   authoredRadiologyReports          RadiologyReport[]             @relation("RadiologyReportAuthor")
   approvedRadiologyReports          RadiologyReport[]             @relation("RadiologyReportApprover")
@@ -428,6 +493,9 @@ model Employee {
   radiologyClinicalReviews          RadiologyClinicalReview[]     @relation("RadiologyClinicalReviewer")
   notifiedRadiologyCritical         RadiologyCriticalCommunication[] @relation("RadiologyCriticalNotifier")
   acknowledgedRadiologyCritical     RadiologyCriticalCommunication[] @relation("RadiologyCriticalAcknowledger")
+  createdExternalRadiologyReferrals  ExternalRadiologyReferral[] @relation("ExternalRadiologyReferralCreator")
+  receivedExternalRadiologyResults   ExternalRadiologyReferral[] @relation("ExternalRadiologyReferralResultReceiver")
+  reviewedExternalRadiologyReferrals ExternalRadiologyReferral[] @relation("ExternalRadiologyReferralReviewer")
 
   createdInvoices                 Invoice[]                     @relation("InvoiceCreator")
   collectedPayments               Payment[]                     @relation("PaymentCollector")
@@ -435,6 +503,8 @@ model Employee {
   decidedDiscountApprovals        DiscountApproval[]            @relation("DiscountDecider")
   requestedRefunds                Refund[]                      @relation("RefundRequester")
   approvedRefunds                 Refund[]                      @relation("RefundApprover")
+  completedRefunds                Refund[]                      @relation("RefundExecutor")
+  decidedRefunds                  Refund[]                      @relation("RefundDecider")
   recordedComplaints              Complaint[]                  @relation("ComplaintRecorder")
   assignedComplaints              Complaint[]                  @relation("ComplaintAssignee")
   complaintEvents                 ComplaintEvent[]             @relation("ComplaintEventActor")
@@ -597,6 +667,7 @@ model ClinicScheduleException {
 model Patient {
   id            String                @id @default(cuid())
   mrn           String                @unique @db.VarChar(30)
+  recordType    PatientRecordType     @default(FULL)
   firstName     String                @db.VarChar(100)
   middleName    String?               @db.VarChar(100)
   lastName      String                @db.VarChar(100)
@@ -619,6 +690,8 @@ model Patient {
   queueEntries  QueueEntry[]
   identityVerifications IdentityVerification[]
   encounters    Encounter[]
+  externalLabIntakes ExternalLabIntake[]
+  recordTypeHistory PatientRecordTypeHistory[]
 
   invoices      Invoice[]
   complaints    Complaint[]
@@ -711,6 +784,8 @@ model PatientConsent {
   @@index([patientId, consentType, recordedAt])
   @@index([signerPatientId, recordedAt])
   @@index([recordedByEmployeeId, recordedAt])
+  externalLabReferral ExternalLabReferral? @relation("ExternalLabReferralConsent")
+  externalRadiologyReferral ExternalRadiologyReferral? @relation("ExternalRadiologyReferralConsent")
 }
 
 model PatientRelationship {
@@ -910,6 +985,7 @@ model IdentityVerification {
   patientId             String
   appointmentId         String?
   encounterId           String?
+  radiologyExamId       String?
   firstElement          IdentityElementType
   secondElement         IdentityElementType
   result                IdentityVerificationResult
@@ -920,11 +996,13 @@ model IdentityVerification {
   patient               Patient                    @relation(fields: [patientId], references: [id], onDelete: Restrict)
   appointment           Appointment?               @relation(fields: [appointmentId], references: [id], onDelete: Restrict)
   encounter             Encounter?                 @relation(fields: [encounterId], references: [id], onDelete: Restrict)
+  radiologyExam         RadiologyExam?             @relation(fields: [radiologyExamId], references: [id], onDelete: Restrict)
   performedByEmployee   Employee                   @relation("IdentityVerifier", fields: [performedByEmployeeId], references: [id], onDelete: Restrict)
 
   @@index([patientId, verifiedAt])
   @@index([appointmentId, verifiedAt])
   @@index([encounterId, verifiedAt])
+  @@index([radiologyExamId, verifiedAt])
   @@index([performedByEmployeeId, verifiedAt])
 }
 
@@ -950,11 +1028,14 @@ model Encounter {
   identityVerifications IdentityVerification[]
   clinicalNotes       ClinicalNote[]
   vitalSigns          VitalSign[]
+  nursingTasks        NursingTask[]
   diagnoses           EncounterDiagnosis[]
   prescriptions       Prescription[]
   referrals           Referral[]
   labOrders           LabOrder[]
+  externalLabReferrals ExternalLabReferral[]
   radiologyOrders     RadiologyOrder[]
+  externalRadiologyReferrals ExternalRadiologyReferral[]
 
   invoices       Invoice[]
   incidentReports IncidentReport[]
@@ -1002,13 +1083,53 @@ model VitalSign {
   weightKg              Decimal? @db.Decimal(6, 2)
   bmi                   Decimal? @db.Decimal(5, 2)
   note                  String?  @db.VarChar(500)
+  nursingTaskId         String?
   createdAt             DateTime @default(now()) @db.Timestamptz(3)
 
-  encounter             Encounter @relation(fields: [encounterId], references: [id], onDelete: Restrict)
-  recordedByEmployee    Employee  @relation("VitalSignRecorder", fields: [recordedByEmployeeId], references: [id], onDelete: Restrict)
+  encounter             Encounter    @relation(fields: [encounterId], references: [id], onDelete: Restrict)
+  recordedByEmployee    Employee     @relation("VitalSignRecorder", fields: [recordedByEmployeeId], references: [id], onDelete: Restrict)
+  nursingTask           NursingTask? @relation(fields: [nursingTaskId], references: [id], onDelete: Restrict)
 
   @@index([encounterId, measuredAt])
+  @@index([nursingTaskId, measuredAt])
   @@index([recordedByEmployeeId, measuredAt])
+}
+
+
+model NursingTask {
+  id                          String           @id @default(cuid())
+  encounterId                 String
+  assignedToEmployeeId        String
+  createdByEmployeeId         String
+  taskType                    NursingTaskType
+  status                      NursingTaskStatus @default(PENDING)
+  instructions                String?          @db.Text
+  dueAt                       DateTime?        @db.Timestamptz(3)
+  startedAt                   DateTime?        @db.Timestamptz(3)
+  completedAt                 DateTime?        @db.Timestamptz(3)
+  completedByEmployeeId       String?
+  cancelledAt                 DateTime?        @db.Timestamptz(3)
+  cancelledByEmployeeId       String?
+  cancellationNote            String?          @db.VarChar(1000)
+  escalatedAt                 DateTime?        @db.Timestamptz(3)
+  escalationNote              String?          @db.VarChar(1000)
+  escalationResolvedAt        DateTime?        @db.Timestamptz(3)
+  escalationResolvedByEmployeeId String?
+  escalationResolutionNote    String?          @db.VarChar(1000)
+  createdAt                   DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt                   DateTime         @updatedAt @db.Timestamptz(3)
+
+  encounter                   Encounter        @relation(fields: [encounterId], references: [id], onDelete: Restrict)
+  assignedToEmployee          Employee         @relation("NursingTaskAssignee", fields: [assignedToEmployeeId], references: [id], onDelete: Restrict)
+  createdByEmployee           Employee         @relation("NursingTaskCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+  completedByEmployee         Employee?        @relation("NursingTaskCompleter", fields: [completedByEmployeeId], references: [id], onDelete: Restrict)
+  cancelledByEmployee         Employee?        @relation("NursingTaskCanceller", fields: [cancelledByEmployeeId], references: [id], onDelete: Restrict)
+  escalationResolvedByEmployee Employee?       @relation("NursingTaskEscalationResolver", fields: [escalationResolvedByEmployeeId], references: [id], onDelete: Restrict)
+  vitalSigns                  VitalSign[]
+
+  @@index([assignedToEmployeeId, status, dueAt, createdAt])
+  @@index([encounterId, status, createdAt])
+  @@index([createdByEmployeeId, createdAt])
 }
 
 model DiagnosisCatalog {
@@ -1174,11 +1295,85 @@ model LabTestComponent {
   @@index([labTestId, isActive, sortOrder])
 }
 
+model PatientRecordTypeHistory {
+  id             String           @id @default(cuid())
+  patientId      String
+  fromType       PatientRecordType
+  toType         PatientRecordType
+  changedByEmployeeId String
+  reason         String           @db.VarChar(500)
+  changedAt      DateTime         @default(now()) @db.Timestamptz(3)
+  patient        Patient          @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  changedByEmployee Employee      @relation("PatientRecordTypeHistoryActor", fields: [changedByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([patientId, changedAt])
+  @@index([changedByEmployeeId, changedAt])
+}
+
+model ExternalLabIntake {
+  id                       String                  @id @default(cuid())
+  intakeReference          String                  @unique @db.VarChar(30)
+  patientId                String
+  requestSource            ExternalLabIntakeSource
+  referringProviderName    String                  @db.VarChar(180)
+  referringFacilityName    String                  @db.VarChar(180)
+  referringProviderContact String?                 @db.VarChar(100)
+  externalRequestReference String?                 @db.VarChar(80)
+  requestNotes             String?                 @db.VarChar(1000)
+  createdByEmployeeId      String
+  createdAt                DateTime                @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime                @updatedAt @db.Timestamptz(3)
+  patient                  Patient                 @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  createdByEmployee        Employee                @relation("ExternalLabIntakeCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+  labOrder                 LabOrder?
+  invoice                  Invoice?
+
+  @@index([patientId, createdAt])
+  @@index([createdByEmployeeId, createdAt])
+}
+
+model ExternalLabReferral {
+  id                       String                    @id @default(cuid())
+  referralReference        String                    @unique @db.VarChar(30)
+  encounterId              String
+  testName                 String                    @db.VarChar(180)
+  reason                   String                    @db.VarChar(1000)
+  externalFacilityName     String                    @db.VarChar(180)
+  externalFacilityContact  String?                   @db.VarChar(100)
+  status                   ExternalLabReferralStatus @default(REFERRED)
+  consentId                String                    @unique
+  resultSummary            String?                   @db.Text
+  resultReceivedAt         DateTime?                 @db.Timestamptz(3)
+  resultReceivedByEmployeeId String?
+  reviewedByEmployeeId     String?
+  reviewedAt               DateTime?                 @db.Timestamptz(3)
+  reviewNotes              String?                   @db.VarChar(1000)
+  cancelledAt              DateTime?                 @db.Timestamptz(3)
+  cancelledByEmployeeId    String?
+  cancellationReason       String?                   @db.VarChar(500)
+  createdByEmployeeId      String
+  referredAt               DateTime                  @default(now()) @db.Timestamptz(3)
+  createdAt                DateTime                  @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime                  @updatedAt @db.Timestamptz(3)
+  encounter                Encounter                 @relation(fields: [encounterId], references: [id], onDelete: Restrict)
+  consent                  PatientConsent            @relation("ExternalLabReferralConsent", fields: [consentId], references: [id], onDelete: Restrict)
+  createdByEmployee        Employee                  @relation("ExternalLabReferralCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+  resultReceivedByEmployee Employee?                 @relation("ExternalLabReferralResultReceiver", fields: [resultReceivedByEmployeeId], references: [id], onDelete: Restrict)
+  reviewedByEmployee       Employee?                 @relation("ExternalLabReferralReviewer", fields: [reviewedByEmployeeId], references: [id], onDelete: Restrict)
+  cancelledByEmployee      Employee?                 @relation("ExternalLabReferralCanceller", fields: [cancelledByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([encounterId, referredAt])
+  @@index([status, referredAt])
+  @@index([resultReceivedByEmployeeId, resultReceivedAt])
+  @@index([reviewedByEmployeeId, reviewedAt])
+}
+
 model LabOrder {
   id                  String                 @id @default(cuid())
   orderReference      String                 @unique @db.VarChar(30)
-  encounterId         String
-  orderedByEmployeeId String
+  encounterId         String?
+  orderedByEmployeeId String?
+  externalIntakeId    String?                @unique
   status              LabOrderStatus         @default(ORDERED)
   priority            DiagnosticOrderPriority @default(ROUTINE)
   clinicalNotes       String?                @db.VarChar(1000)
@@ -1189,8 +1384,9 @@ model LabOrder {
   createdAt           DateTime               @default(now()) @db.Timestamptz(3)
   updatedAt           DateTime               @updatedAt @db.Timestamptz(3)
 
-  encounter           Encounter              @relation(fields: [encounterId], references: [id], onDelete: Restrict)
-  orderedByEmployee   Employee               @relation("LabOrderAuthor", fields: [orderedByEmployeeId], references: [id], onDelete: Restrict)
+  encounter           Encounter?             @relation(fields: [encounterId], references: [id], onDelete: Restrict)
+  orderedByEmployee   Employee?              @relation("LabOrderAuthor", fields: [orderedByEmployeeId], references: [id], onDelete: Restrict)
+  externalIntake      ExternalLabIntake?     @relation(fields: [externalIntakeId], references: [id], onDelete: Restrict)
   items               LabOrderItem[]
 
   @@index([encounterId, orderedAt])
@@ -1214,7 +1410,7 @@ model LabOrderItem {
 
   labOrder            LabOrder            @relation(fields: [labOrderId], references: [id], onDelete: Restrict)
   labTest             LabTest             @relation(fields: [labTestId], references: [id], onDelete: Restrict)
-  sampleAssignment    LabSampleItem?
+  sampleAssignments   LabSampleItem[]
   result              LabResult?
 
   invoiceItems InvoiceItem[]
@@ -1227,6 +1423,7 @@ model LabSample {
   id                    String          @id @default(cuid())
   sampleNumber          String          @unique @db.VarChar(30)
   status                LabSampleStatus @default(COLLECTED)
+  specimenTypeSnapshot  String?         @db.VarChar(100)
   collectedByEmployeeId String
   receivedByEmployeeId  String?
   collectedAt           DateTime        @default(now()) @db.Timestamptz(3)
@@ -1247,13 +1444,14 @@ model LabSample {
 model LabSampleItem {
   id             String       @id @default(cuid())
   sampleId       String
-  orderItemId    String       @unique
+  orderItemId    String
   createdAt      DateTime     @default(now()) @db.Timestamptz(3)
   sample         LabSample    @relation(fields: [sampleId], references: [id], onDelete: Restrict)
   orderItem      LabOrderItem @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
 
   @@unique([sampleId, orderItemId])
   @@index([sampleId])
+  @@index([orderItemId, createdAt])
 }
 
 model LabResult {
@@ -1450,18 +1648,26 @@ model RadiologyExam {
   performedAt           DateTime?                 @db.Timestamptz(3)
   performedByEmployeeId String?
   notes                 String?                   @db.VarChar(1000)
+  preparationInstructionsSnapshot String?           @db.Text
+  preparationStatus     RadiologyExamPreparationStatus @default(PENDING)
+  preparationNotes      String?                   @db.VarChar(1000)
+  preparationCheckedByEmployeeId String?            
+  preparationCheckedAt  DateTime?                 @db.Timestamptz(3)
   createdAt             DateTime                  @default(now()) @db.Timestamptz(3)
   updatedAt             DateTime                  @updatedAt @db.Timestamptz(3)
 
   orderItem             RadiologyOrderItem        @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
   resource              RadiologyResource?        @relation(fields: [resourceId], references: [id], onDelete: Restrict)
   performedByEmployee  Employee?                 @relation("RadiologyExamPerformer", fields: [performedByEmployeeId], references: [id], onDelete: Restrict)
+  preparationCheckedByEmployee Employee?             @relation("RadiologyExamPreparationChecker", fields: [preparationCheckedByEmployeeId], references: [id], onDelete: Restrict)
+  identityVerifications IdentityVerification[]
   pregnancyScreening   RadiologyPregnancyScreening?
   report                RadiologyReport?
 
   @@index([status, scheduledStartsAt])
   @@index([resourceId, scheduledStartsAt, scheduledEndsAt])
   @@index([performedByEmployeeId, performedAt])
+  @@index([preparationCheckedByEmployeeId, preparationCheckedAt])
 }
 
 model RadiologyPregnancyScreening {
@@ -1473,9 +1679,15 @@ model RadiologyPregnancyScreening {
   screenedAt            DateTime                @default(now()) @db.Timestamptz(3)
   exam                  RadiologyExam           @relation(fields: [examId], references: [id], onDelete: Restrict)
   recordedByEmployee    Employee                @relation("PregnancyScreeningRecorder", fields: [recordedByEmployeeId], references: [id], onDelete: Restrict)
+  reviewDecision        RadiologyPregnancyReviewDecision?
+  reviewNotes           String?                 @db.VarChar(1000)
+  reviewedByEmployeeId  String?
+  reviewedAt            DateTime?               @db.Timestamptz(3)
+  reviewedByEmployee    Employee?               @relation("PregnancyScreeningReviewer", fields: [reviewedByEmployeeId], references: [id], onDelete: Restrict)
 
   @@index([result, screenedAt])
   @@index([recordedByEmployeeId, screenedAt])
+  @@index([reviewedByEmployeeId, reviewedAt])
 }
 
 model RadiologyReport {
@@ -1485,6 +1697,8 @@ model RadiologyReport {
   findings             String                @db.Text
   impression           String                @db.Text
   recommendations      String?               @db.Text
+  isCritical            Boolean               @default(false)
+  criticalReason        String?               @db.VarChar(1000)
   authoredByEmployeeId String
   approvedByEmployeeId String?
   authoredAt           DateTime              @default(now()) @db.Timestamptz(3)
@@ -1554,6 +1768,46 @@ model RadiologyCriticalCommunication {
 
   @@index([status, createdAt])
   @@index([reportId, createdAt])
+}
+
+
+// Incoming outside-provider imaging results are held separately from clinic-performed
+// RadiologyReport records. They remain scoped to the originating active Encounter.
+model ExternalRadiologyReferral {
+  id                         String                           @id @default(cuid())
+  referralReference          String                           @unique @db.VarChar(30)
+  encounterId                String
+  procedureName              String                           @db.VarChar(180)
+  reason                     String                           @db.VarChar(1000)
+  externalFacilityName       String                           @db.VarChar(180)
+  externalFacilityContact    String?                          @db.VarChar(100)
+  status                     ExternalRadiologyReferralStatus  @default(REFERRED)
+  consentId                  String                           @unique
+  resultFindings             String?                          @db.Text
+  resultImpression           String?                          @db.Text
+  resultRecommendations      String?                          @db.Text
+  resultPerformedAt          DateTime?                        @db.Timestamptz(3)
+  resultReceivedAt           DateTime?                        @db.Timestamptz(3)
+  resultReceivedByEmployeeId String?
+  reviewDecision             DiagnosticReviewDecision?
+  reviewNotes                String?                          @db.VarChar(1000)
+  reviewedByEmployeeId      String?
+  reviewedAt                 DateTime?                        @db.Timestamptz(3)
+  createdByEmployeeId        String
+  referredAt                 DateTime                         @default(now()) @db.Timestamptz(3)
+  createdAt                  DateTime                         @default(now()) @db.Timestamptz(3)
+  updatedAt                  DateTime                         @updatedAt @db.Timestamptz(3)
+
+  encounter                  Encounter                        @relation(fields: [encounterId], references: [id], onDelete: Restrict)
+  consent                    PatientConsent                   @relation("ExternalRadiologyReferralConsent", fields: [consentId], references: [id], onDelete: Restrict)
+  createdByEmployee          Employee                         @relation("ExternalRadiologyReferralCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+  resultReceivedByEmployee   Employee?                        @relation("ExternalRadiologyReferralResultReceiver", fields: [resultReceivedByEmployeeId], references: [id], onDelete: Restrict)
+  reviewedByEmployee         Employee?                        @relation("ExternalRadiologyReferralReviewer", fields: [reviewedByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([encounterId, referredAt])
+  @@index([status, referredAt])
+  @@index([resultReceivedByEmployeeId, resultReceivedAt])
+  @@index([reviewedByEmployeeId, reviewedAt])
 }
 
 
@@ -1700,7 +1954,8 @@ model Invoice {
   id                  String        @id @default(cuid())
   invoiceNumber       String        @unique @db.VarChar(30)
   patientId           String
-  encounterId         String        @unique
+  encounterId         String?       @unique
+  externalLabIntakeId  String?       @unique
   status              InvoiceStatus @default(DRAFT)
   subtotal            Decimal       @db.Decimal(10, 2)
   discountTotal       Decimal       @default(0) @db.Decimal(10, 2)
@@ -1714,7 +1969,8 @@ model Invoice {
   updatedAt           DateTime      @updatedAt @db.Timestamptz(3)
 
   patient             Patient       @relation(fields: [patientId], references: [id], onDelete: Restrict)
-  encounter           Encounter     @relation(fields: [encounterId], references: [id], onDelete: Restrict)
+  encounter           Encounter?    @relation(fields: [encounterId], references: [id], onDelete: Restrict)
+  externalLabIntake   ExternalLabIntake? @relation(fields: [externalLabIntakeId], references: [id], onDelete: Restrict)
   createdByEmployee   Employee      @relation("InvoiceCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
   items               InvoiceItem[]
   payments            Payment[]
@@ -1805,8 +2061,13 @@ model Refund {
   status                RefundStatus @default(PENDING)
   requestedByEmployeeId String
   approvedByEmployeeId  String?
+  decidedByEmployeeId   String?
+  completedByEmployeeId String?
+  paymentMethod         PaymentMethod?
+  transactionReference String?     @db.VarChar(120)
   requestedAt           DateTime     @default(now()) @db.Timestamptz(3)
   approvedAt            DateTime?    @db.Timestamptz(3)
+  decidedAt             DateTime?    @db.Timestamptz(3)
   completedAt           DateTime?    @db.Timestamptz(3)
   createdAt             DateTime     @default(now()) @db.Timestamptz(3)
   updatedAt             DateTime     @updatedAt @db.Timestamptz(3)
@@ -1814,11 +2075,15 @@ model Refund {
   invoice               Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
   requestedByEmployee   Employee     @relation("RefundRequester", fields: [requestedByEmployeeId], references: [id], onDelete: Restrict)
   approvedByEmployee    Employee?    @relation("RefundApprover", fields: [approvedByEmployeeId], references: [id], onDelete: Restrict)
+  decidedByEmployee     Employee?    @relation("RefundDecider", fields: [decidedByEmployeeId], references: [id], onDelete: Restrict)
+  completedByEmployee   Employee?    @relation("RefundExecutor", fields: [completedByEmployeeId], references: [id], onDelete: Restrict)
   items                 RefundItem[]
 
   @@index([invoiceId, status, requestedAt])
   @@index([requestedByEmployeeId, requestedAt])
   @@index([approvedByEmployeeId, approvedAt])
+  @@index([decidedByEmployeeId, decidedAt])
+  @@index([completedByEmployeeId, completedAt])
 }
 
 model RefundItem {

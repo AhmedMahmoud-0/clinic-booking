@@ -1,0 +1,7 @@
+MERUNO Update 68 — Fix 01
+Fixes the missing labOrderItemIdSchema export that prevented the Update 68 submit-result API route from compiling.
+
+Changed: 2 existing files (one server validation module, one unit test file)
+Added: 1 regression unit test
+Database / Prisma: no changes; no migration required
+Expected totals: 1,078 unit tests across 95 files; 157 E2E tests

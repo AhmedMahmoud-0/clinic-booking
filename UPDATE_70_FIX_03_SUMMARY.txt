@@ -1,0 +1,8 @@
+MERUNO Update70 Fix03
+
+One-file authorization matrix correction.
+- Adds PATIENT_DOCUMENT_READ to Reception.
+- Keeps PATIENT_DOCUMENT_UPLOAD on Reception.
+- Removes both general patient-document permissions from Doctor.
+- No schema change, no migration, no dependency change.
+- Preserves all unrelated Update70/Fix01/Fix02 permissions.

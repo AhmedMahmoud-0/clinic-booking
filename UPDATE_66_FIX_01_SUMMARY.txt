@@ -1,0 +1,9 @@
+MERUNO Update 66 Fix 01
+
+Repairs:
+- Nullable Appointment patient identity is rejected safely by source-consistency policy.
+- Doctor profile access is explicitly null-safe.
+- NursingTask updateMany uses the Prisma unchecked input variant for server-controlled FK scalar fields, while preserving row locks and conditional status updates.
+- Adds one regression unit test.
+
+No Prisma schema or migration change. Do not run migration commands.

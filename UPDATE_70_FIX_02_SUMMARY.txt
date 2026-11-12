@@ -1,0 +1,24 @@
+MERUNO Update70 Fix02 — Patient Permission Compatibility
+
+Files replaced:
+- src/server/auth/authorization/types.ts
+- src/server/auth/authorization/policy.ts
+
+Restored permission identifiers used by existing patient workflows:
+- PATIENT_CONTACT_READ / PATIENT_CONTACT_MANAGE
+- PATIENT_CONSENT_READ / PATIENT_CONSENT_RECORD
+- PATIENT_DOCUMENT_READ / PATIENT_DOCUMENT_UPLOAD
+- PATIENT_RELATIONSHIP_READ / PATIENT_RELATIONSHIP_MANAGE
+
+Preserved:
+- Update44 APPOINTMENT_PATIENT_OVERLAP_OVERRIDE (Reception-only)
+- Update70 radiology workflow, report approval, and critical communication permissions
+- Existing patient identity, delegation, and account-link permissions
+
+Least-privilege matrix:
+- Reception: contact read/manage; consent read/record; relationship read/manage; document upload
+- Doctor: consent read/record; document read/upload
+- No document-read permission for Reception, Nurse, Cashier, Clinic Manager, or System Admin
+- No contact/relationship management permission for Doctor, Cashier, Clinic Manager, or System Admin
+
+No Prisma schema or migration changes. Migration16 remains applied; do not rerun it.

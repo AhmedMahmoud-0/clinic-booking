@@ -1,0 +1,19 @@
+MERUNO Update 71 — Phase 9A plus the cashier invoice/payment/receipt slice of 9C
+Invoices, Full In-Clinic Payments, Cashier Workbench, and Receipts
+
+Included:
+- Encounter-linked draft invoice creation and idempotent refresh.
+- Billing eligibility list for completed encounters without invoices.
+- Validation before issuance: all related services complete/cancelled and all billable services represented.
+- Full-only collection through Cash, POS card, or clinic e-wallet.
+- Persisted receipt API and printable receipt presentation.
+- Reusable responsive cashier workbench component.
+- Narrow authorization permissions and server-side cashier role checks.
+- Unit tests carried forward for invoice policy/validation/authorization.
+
+No Prisma schema changes. No migrations.
+
+UI integration note:
+Mount `CashierInvoiceWorkbench` inside the existing Cashier workspace page and pass the required `copy` map from existing ar.json/en.json translations. Do not hardcode labels or add a second translation system.
+
+Next: Update 72 — discounts, item-level refunds, manager approval worklists, finance reports, diagnostic-only external-intake billing, and walk-in billing snapshots.

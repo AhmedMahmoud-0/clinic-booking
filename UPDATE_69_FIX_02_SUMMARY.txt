@@ -1,0 +1,8 @@
+MERUNO Update 69 Fix 02
+
+Corrects one malformed nested Prisma select in lab-result-review.ts:
+LabOrder.externalIntake is now selected within the LabOrder.select object.
+
+Expected to resolve TS2353 for externalIntake and the follow-on inference errors for LabResult.values and LabResult.orderItem.
+
+No schema or database change. No migration. Retain Update 69 Fix 01.

@@ -15,7 +15,7 @@ function availabilityJson(body: Record<string, unknown>, status = 200): Response
   });
 }
 
-/** Public read-only slot discovery; creating a booking is a separate operation. */
+/** Public, read-only slot discovery; creating a booking is a separate operation. */
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const parsed = appointmentAvailabilityQuerySchema.safeParse({
@@ -45,6 +45,15 @@ export async function GET(request: Request): Promise<Response> {
         error.status,
       );
     }
+
+    // Keep public responses generic, but log only safe diagnostic metadata so
+    // database/ORM failures can be distinguished from availability policy errors.
+    const errorName = error instanceof Error ? error.name : "UnknownError";
+    const errorCode = typeof error === "object" && error !== null && "code" in error
+      && typeof error.code === "string"
+      ? error.code
+      : undefined;
+    console.error("[public-appointment-availability] Unexpected failure", { errorName, errorCode });
 
     return availabilityJson(
       {

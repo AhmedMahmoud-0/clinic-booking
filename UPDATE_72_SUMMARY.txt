@@ -1,0 +1,25 @@
+MERUNO Update 72 — Phase 9B
+===========================
+
+Scope
+-----
+Discount requests and Clinic Manager decisions; unprovided invoice-item refund requests and approvals; Cashier execution of approved refunds using the original payment method; external diagnostic-intake invoicing; Walk-in consultation price snapshots; financial reporting.
+
+Included
+--------
+- 6 replacement files and 24 added application/test files, plus migration and documentation files.
+- Existing DiscountApproval / Refund / RefundItem models are reused.
+- One additive PostgreSQL migration adds a mutually exclusive ExternalLabIntake invoice source and refund decision/execution audit fields.
+- Role boundaries remain Cashier vs Clinic Manager. System Admin receives no billing permissions.
+- Existing invoice and payment records are retained; no invoice row is silently deleted or rewritten to simulate a refund.
+- External-intake invoice drafts can be refreshed after more results become released.
+- Walk-in pricing is snapshotted to the draft line.
+- No translation files/keys or dependencies are added.
+
+Not included
+------------
+Online payment gateway, partial payments, installments, insurance claims, System Admin financial access, or production patient data.
+
+Verification
+------------
+Static review and package consistency checks were performed in the artifact workspace. The complete application environment and developer PostgreSQL database are not available in this packaging session, so Prisma validation, migrations, typecheck, ESLint, Vitest, Playwright, and production build must be run locally using APPLY_UPDATE_72.md. Do not treat this update as verified until those local checks pass.

@@ -47,7 +47,7 @@ const baseURL = authUrl.origin;
 const hostname = authUrl.hostname;
 const port = authUrl.port || (authUrl.protocol === "https:" ? "443" : "80");
 const httpsFlag = authUrl.protocol === "https:" ? " --experimental-https" : "";
-const webServerCommand = `npm run dev -- --hostname ${hostname} --port ${port}${httpsFlag}`;
+const webServerCommand = `npx next dev --webpack --hostname ${hostname} --port ${port}${httpsFlag}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -78,11 +78,11 @@ export default defineConfig({
   ],
   webServer: {
     command: webServerCommand,
-    url: `${baseURL}/login`,
+    url: `${baseURL}/`,
     ignoreHTTPSErrors: true,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-    stdout: "ignore",
+    timeout: 300_000,
+    stdout: "pipe",
     stderr: "pipe",
   },
 });

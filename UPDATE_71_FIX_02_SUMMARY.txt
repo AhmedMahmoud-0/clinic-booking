@@ -1,0 +1,6 @@
+MERUNO Update 71 Fix 02
+
+- Fixes the hook lint failure by ensuring the effect calls a fetch-only function, then updates state from asynchronous Promise callbacks.
+- Uses Next.js 16 Webpack dev mode for Playwright because the prior Turbopack run logged multi-minute filesystem cache database compaction and route request delays.
+- Adds safe server-side error metadata for the unexpected public appointment availability 500 while retaining the generic public response.
+- No migrations or database changes.

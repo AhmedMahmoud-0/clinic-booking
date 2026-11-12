@@ -1,0 +1,16 @@
+MERUNO Update 68 — Phase 8D–8E: Lab Result Review, Approval, Release, and Critical Communication
+
+Implements the internal laboratory result lifecycle after Update 67:
+- Original Lab Staff author submits a DRAFT result for review.
+- A different active Lab Staff employee approves or returns it for correction.
+- Approved results can be released; order items and parent orders advance transactionally.
+- Explicit critical flags require every recorded communication to receive ordering-Doctor read-back acknowledgement before release.
+- Lab Staff can record notification method/recipient and escalate non-acknowledged communications.
+- The ordering Doctor receives a non-PHI in-app notification, can read released results, acknowledge critical-result read-back, and record a clinical review/follow-up decision.
+
+No Prisma schema change or migration is included. Existing LabResultReview, LabCriticalCommunication, LabClinicalReview, Notification, and AuditLog models are reused.
+
+New tests: 43 unit tests and 11 E2E tests.
+Expected cumulative totals: 1,077 unit tests across 95 files; 157 E2E tests.
+
+External laboratory referrals and outside-patient intake (8F) move to Update 69 with radiology scheduling and preparation (8G–8H) because they require a separate external-case/scheduling lifecycle.

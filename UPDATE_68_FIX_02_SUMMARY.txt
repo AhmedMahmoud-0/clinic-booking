@@ -1,0 +1,5 @@
+MERUNO Update 68 — Fix 02
+Corrected LabResult author relation selection in the review worklist.
+Schema field: authoredByEmployee (not authoredBy).
+One source file changed. No schema, migration, dependency, or environment changes.
+Keep Fix 01 applied.

@@ -1,0 +1,30 @@
+MERUNO Update 70 — Phase 8I–8J
+Radiology Execution, Report Approval, Critical Communication, and External Radiology Results
+
+SCOPE
+- Readiness-gated Radiology Staff exam start.
+- Atomic exam completion, performer attribution, and parent-order completion only after all items are terminal.
+- Radiologist-authored report drafts with findings, impression, optional recommendations, and explicit critical classification/reason.
+- Independent Radiologist review: author cannot approve their own report; changes requested return the report to the author as DRAFT while retaining review history.
+- Controlled report release after approval.
+- Critical report communication, generic in-app notification, explicit ordering-Doctor read-back, escalation, and a release gate requiring all communications acknowledged.
+- Separate least-privilege authorization: Radiology Staff manage exam execution; Radiologists manage reports; both roles can manage critical communications.
+- Protected assigned-Doctor report retrieval before release only for an approved critical report with an open communication; post-release clinical review.
+- Consent-backed external radiology referrals from an active assigned Encounter, outside result receipt, and assigned-Doctor review.
+- Database-level constraint ensuring external radiology consent matches the Encounter patient and is granted for EXTERNAL_DIAGNOSTIC_DATA_SHARING.
+
+DATABASE
+- Migration 16: 20261111020000_radiology_execution_reporting_and_external_results
+- Adds RadiologyReport.isCritical and RadiologyReport.criticalReason with a consistency check.
+- Adds ExternalRadiologyReferral and ExternalRadiologyReferralStatus with lifecycle constraints and foreign keys.
+- Adds matching-consent trigger for external radiology referrals.
+- Reuses existing RadiologyReportReview, RadiologyClinicalReview, RadiologyCriticalCommunication, DiagnosticReviewDecision, and Employee role relations.
+
+NO UI / NO PACS / NO DICOM / NO BINARY REPORT UPLOAD
+- Secure report delivery is through protected API routes scoped to the assigned Doctor.
+- External report receipt accepts structured text only.
+- Patient-portal result access remains in Phase 10.
+
+VALIDATION
+- Unit tests and E2E tests are included in this update.
+- The update has not been executed against the user's full local project in this environment. Apply it and run the validation commands in APPLY_UPDATE_70.md before considering Update 70 complete.

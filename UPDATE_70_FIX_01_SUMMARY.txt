@@ -1,0 +1,18 @@
+MERUNO Update70 Fix01
+
+Scope:
+- Fix TypeScript strict-null narrowing throughout radiology-phase-8i-j.ts by converting fail() to a named function declaration returning never.
+- Restore the Update44 appointment.patient-overlap.override permission omitted by Update70's copied authorization files.
+- Keep the appointment overlap override assigned to Reception only.
+- Add a least-privilege regression test.
+
+No Prisma schema changes.
+No migration changes.
+No database commands required.
+
+Checks performed in the build environment:
+- Strict TypeScript check of authorization/types.ts and authorization/policy.ts: PASS.
+- Permission matrix execution: Reception=true; Doctor/Nurse/Lab Staff/Radiology Staff/Radiologist/Cashier/Clinic Manager/System Admin=false.
+- TypeScript strict-null narrowing regression snippet: PASS.
+- TypeScript syntax parsing of all 4 updated TS files: PASS.
+- Full project typecheck, lint, Vitest, Playwright, and build were not run in the user's application environment.

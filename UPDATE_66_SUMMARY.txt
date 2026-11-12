@@ -1,0 +1,11 @@
+MERUNO Update 66 — Phase 7M (Combined)
+
+Adds the Nurse task lifecycle, task-linked vital-sign recording using the existing VitalSign model, explicit task escalation to the assigned Doctor, Doctor resolution of escalations, and guarded completion of an Encounter with its originating Appointment and APPOINTMENT QueueEntry, or its WALK_IN QueueEntry.
+
+Migration 13 adds NursingTask enums/table, restrictive foreign keys, indexes, lifecycle constraints, and a nullable link from VitalSign to NursingTask. Existing VitalSign records are preserved untouched.
+
+No Doctor/Nurse UI, referral follow-up, prescription correction/version history, lab/radiology processing, or automated clinical thresholds are included.
+
+Apply instructions and database command order: APPLY_UPDATE_66.md
+File-by-file details: UPDATE_66_FILE_GUIDE.md
+Expected verification baseline: 989 unit tests / 90 files and 138 Playwright E2E tests, plus typecheck, lint, and production build.

@@ -1,0 +1,27 @@
+MERUNO Update 69 — Phase 8F–8H
+
+Scope:
+- External provider laboratory intake for new diagnostic-only or existing identity-verified patients.
+- Doctor external laboratory referrals with matching, granted, scoped patient data-sharing consent.
+- External result receipt, assigned-Doctor review, cancellation before receipt, and external-provider critical read-back.
+- Explicit Reception conversion of diagnostic-only records after a fresh two-element identity verification.
+- Radiology resource scheduling with configured duration, timezone-aware future starts, row locking, overlap checks, and a PostgreSQL exclusion constraint.
+- Exam-linked patient identity verification, preparation tracking, digital X-ray pregnancy screening, Radiologist review, and readiness gating.
+
+Database:
+- Adds Migration 15: 20261111010000_external_lab_intake_and_radiology_preparation.
+- No destructive reset, drop, truncate, delete, or reseed operation.
+- The migration deliberately stops if existing active radiology resource bookings overlap.
+- Requires PostgreSQL btree_gist extension support.
+
+Expected tests after local application:
+- 1,139 unit tests across 100 files.
+- 176 Playwright E2E tests.
+
+Verification note:
+- TypeScript syntax parsing was checked for the packaged .ts files after correcting a nested Prisma select syntax error in radiology-workflow.ts.
+- Full project typecheck, Prisma validation/client generation, Vitest, Playwright, database migration, and production build have NOT been run in the developer's project and must be verified locally.
+
+Scope exclusions:
+- Radiology exam execution, report drafting/approval/release, external radiology, secure report delivery, full staff UI, PACS/DICOM, and clinical certification are not included.
+- Portfolio/demo only; use synthetic data.

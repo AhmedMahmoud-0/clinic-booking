@@ -1,0 +1,10 @@
+MERUNO Update69 Fix01
+
+Four source files:
+- src/server/laboratory/lab-result-review-validation.ts
+- src/server/laboratory/lab-result-review.ts
+- src/server/laboratory/external-lab.ts
+- src/server/radiology/radiology-workflow.ts
+
+Restores Update68 validation export, corrects/retains LabResult author relation naming and external-intake query support, fixes TypeScript null narrowing, and removes invalid const assertion.
+No schema or migration changes.
