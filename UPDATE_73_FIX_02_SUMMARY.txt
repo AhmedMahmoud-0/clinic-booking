@@ -1,0 +1,5 @@
+MERUNO — Update 73 Fix 02
+Homepage heading accessible-name whitespace correction.
+
+Replace only: src/app/page.tsx
+No database, migration, dependency, environment, API, or business-logic changes.

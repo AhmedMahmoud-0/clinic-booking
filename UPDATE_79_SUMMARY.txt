@@ -1,0 +1,16 @@
+MERUNO Update 79 — Phase 11 System Administration
+
+Adds:
+- Protected System Admin workspace and 7 screens.
+- Employee directory with verified account-link status and existing-role grant/revoke actions.
+- Fixed role/permission matrix display.
+- Technical dashboard aggregates.
+- Safe audit-log search restricted to employee access/account-link and clinic catalog entities (not patient/clinical/billing entities).
+- Read-only clinic catalog and schedule views.
+- Explicit system-settings boundary page because no persisted settings model exists.
+- Role-change validation, separate Clinic Manager/System Admin policy, last verified active System Admin protection, transactional AuditLog.
+
+No schema, migrations, seed, dependencies, package scripts, environment files, account credentials, or clinical data access changes.
+
+Focused tests included: 5 unit policy tests and 2 Playwright access-control tests.
+Phase 12 integrated testing and release readiness remains pending.

@@ -1,0 +1,4 @@
+MERUNO Update 73 Fix 03
+Removed the duplicate "Skip to main content" anchor from PublicSiteLayout.
+The existing root-layout skip link remains and targets #main-content.
+No test, database, dependency, translation, or business-logic changes.

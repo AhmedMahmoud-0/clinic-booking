@@ -1,0 +1,14 @@
+MERUNO — UPDATE 73
+Phase 10: Public Website Foundation & Core Pages
+
+Delivered:
+- Responsive public website header and footer.
+- Home page replacing the Phase 1 illustrative preview.
+- About MERUNO page.
+- Services overview: consultations, internal laboratory, Digital X-ray, and Ultrasound.
+- Server-side reuse of the Phase 4C public clinic catalog.
+- English-only and LTR-only layout preserved.
+- Loading skeleton and unavailable-catalog states.
+- Playwright E2E coverage for public pages and mobile overflow.
+
+No database migration, schema change, dependency, environment change, or booking-engine rewrite.

@@ -1,37 +1,29 @@
-# MERUNO Update 24 — Fix 01 (Phase 3G-A)
+# MERUNO Update 78 — Fix 01
 
-This is a focused correction for the three issues found during local validation of Update 24. It does not replace Update 24 and does not introduce a new feature.
+## Purpose
 
-## Files to replace
+This focused fix addresses the two issues reported after Update 78:
 
-1. `src/components/auth/reset-password-form.tsx`
-   - Captures the reset token in a constant after the invalid/missing-token guard.
-   - Passes the narrowed `string` value to `authClient.resetPassword`, resolving the TypeScript `string | null` mismatch without weakening types or allowing a missing token through.
-2. `tests/e2e/auth-entry.spec.ts`
-   - Locates the password input by its exact textbox role/name, rather than matching both the input and the accessible “Show password” button.
-3. `tests/e2e/auth-lifecycle.spec.ts`
-   - Locates the registration password input by exact textbox role/name, avoiding an ambiguous match with the confirmation field.
+1. ESLint `react/no-unescaped-entities` in the Clinic Manager complaints page.
+2. The Reception complaint-intake page has two valid unauthenticated/unauthorized outcomes: an anonymous visitor is redirected to `/login`, while an authenticated account without the dedicated `complaint.intake` permission is shown the explicit `Complaint intake is restricted` page. The previous E2E assertion incorrectly expected both cases to redirect.
+
+## Files
+
+- `src/components/clinic-manager/complaints-management-view.tsx` — escapes the apostrophe in JSX text; no behavior change.
+- `tests/e2e/clinic-manager-operations.spec.ts` — separates Clinic Manager login redirects from Reception permission-denial behavior and verifies the intake form is not exposed to an account without permission.
 
 ## Apply
 
-1. Extract this ZIP into the existing `clinic-booking` project root.
-2. Merge the folders and replace only the three files listed above.
-3. Do not reapply the full Update 24 ZIP. Do not replace `.env`, dependencies, Prisma schema/migrations, generated Prisma files, or the database.
+1. Stop any running `npm run dev` process.
+2. Extract this ZIP into the project root, preserving the `src` and `tests` paths.
+3. Replace only the two listed files. Preserve unrelated local changes.
+4. Do not apply Update 78 Fix 02, and do not make schema, migration, dependency, or environment changes for this fix.
 
-## Dependencies and database
-
-- No dependency installation is required.
-- No Prisma generation or database migration is required.
-- No environment variables or database records are changed.
-
-## Validate in this exact order
+## Verify
 
 ```powershell
-npm run typecheck
 npm run lint
-npm test
-npm run test:e2e
-npm run build
+npx playwright test tests/e2e/clinic-manager-operations.spec.ts --workers=1 --reporter=list
 ```
 
-Expected results, assuming no other local changes: typecheck and lint pass, 41 unit tests pass, all 11 E2E tests pass, and production build passes.
+Typecheck, unit tests, and production build do not need to be rerun for these two focused edits. If the focused checks pass, Update 78 can be closed based on the earlier successful typecheck, 11/11 unit tests, and production build.

@@ -1,47 +1,74 @@
+.page,
+.page *,
+.statusPage,
+.statusPage * {
+  box-sizing: border-box;
+}
+
 .page {
   min-height: 100svh;
   display: grid;
   place-items: center;
-  padding: 32px;
-  background: #f5f8f7;
-  color: #24343b;
+  padding: clamp(16px, 3vw, 42px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 12%, rgb(23 107 103 / 9%), transparent 30%),
+    radial-gradient(circle at 92% 88%, rgb(139 185 173 / 15%), transparent 28%),
+    #f3f7f5;
+  color: #233b39;
   font-family: inherit;
 }
 
 .layout {
-  width: min(100%, 1040px);
-  min-height: 640px;
+  position: relative;
+  width: min(100%, 1120px);
+  min-height: min(720px, calc(100svh - 48px));
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
   overflow: hidden;
-  border: 1px solid #e5eceb;
-  border-radius: 18px;
+  border: 1px solid #e0eae6;
+  border-radius: 30px;
   background: #fff;
-  box-shadow: 0 24px 70px rgb(36 52 59 / 8%);
+  box-shadow: 0 32px 90px rgb(25 58 53 / 13%);
 }
 
 .brandPanel {
   position: relative;
+  isolation: isolate;
   display: flex;
+  min-width: 0;
   flex-direction: column;
   justify-content: space-between;
-  padding: 42px;
+  padding: clamp(30px, 4vw, 56px);
   overflow: hidden;
-  background: linear-gradient(145deg, #176b67 0%, #125754 100%);
+  background: linear-gradient(145deg, #176b67 0%, #145b57 54%, #103f40 100%);
   color: #fff;
 }
 
+.brandPanel::before,
 .brandPanel::after {
   position: absolute;
-  right: -130px;
-  bottom: -170px;
-  width: 420px;
-  height: 420px;
+  z-index: -1;
   border: 1px solid rgb(255 255 255 / 13%);
   border-radius: 50%;
   content: "";
-  box-shadow: 0 0 0 42px rgb(255 255 255 / 4%), 0 0 0 84px rgb(255 255 255 / 3%);
   pointer-events: none;
+}
+
+.brandPanel::before {
+  width: 520px;
+  height: 520px;
+  right: -250px;
+  bottom: -170px;
+  box-shadow: 0 0 0 42px rgb(255 255 255 / 4%), 0 0 0 92px rgb(255 255 255 / 3%);
+}
+
+.brandPanel::after {
+  width: 300px;
+  height: 300px;
+  left: -200px;
+  top: 180px;
+  box-shadow: 0 0 0 30px rgb(255 255 255 / 3%);
 }
 
 .brand,
@@ -50,24 +77,25 @@
   z-index: 1;
   display: inline-flex;
   width: fit-content;
+  max-width: 100%;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
   color: inherit;
   text-decoration: none;
 }
 
 .brandMark {
   display: grid;
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
   place-items: center;
-  border: 1px solid rgb(255 255 255 / 35%);
-  border-radius: 13px;
-  background: rgb(255 255 255 / 12%);
+  border: 1px solid rgb(255 255 255 / 34%);
+  border-radius: 15px;
+  background: rgb(255 255 255 / 13%);
   color: #fff;
-  font-size: 23px;
-  font-weight: 750;
+  font-size: 25px;
+  font-weight: 800;
   letter-spacing: -0.08em;
 }
 
@@ -75,54 +103,59 @@
 .mobileBrand strong {
   display: block;
   font-size: 18px;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+  font-weight: 800;
+  letter-spacing: 0.13em;
   line-height: 1.2;
 }
 
 .brand small,
 .mobileBrand small {
   display: block;
-  margin-top: 4px;
+  margin-top: 5px;
   font-size: 9px;
-  font-weight: 650;
-  letter-spacing: 0.19em;
-  opacity: 0.78;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  opacity: 0.8;
 }
 
 .brandCopy {
   position: relative;
   z-index: 1;
-  max-width: 360px;
-  margin: 64px 0;
+  max-width: 410px;
+  margin: 60px 0;
 }
 
 .eyebrow {
-  display: inline-block;
-  color: #8cbdb4;
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: 0.16em;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #6d9991;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+  text-transform: uppercase;
 }
 
 .brandCopy .eyebrow {
-  color: #c5e1dc;
+  color: #c5e2dc;
 }
 
 .brandCopy h1 {
-  margin: 16px 0 14px;
-  font-size: clamp(34px, 4vw, 48px);
+  margin: 18px 0 16px;
+  color: #fff;
+  font-size: clamp(38px, 4.2vw, 56px);
   font-weight: 650;
-  letter-spacing: -0.045em;
-  line-height: 1.08;
+  letter-spacing: -0.055em;
+  line-height: 1.04;
 }
 
 .brandCopy p {
-  max-width: 310px;
+  max-width: 350px;
   margin: 0;
   color: rgb(255 255 255 / 78%);
   font-size: 15px;
-  line-height: 1.75;
+  line-height: 1.85;
 }
 
 .trustNote {
@@ -130,27 +163,38 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: rgb(255 255 255 / 82%);
+  gap: 11px;
+  color: rgb(255 255 255 / 86%);
   font-size: 12px;
+  font-weight: 600;
 }
 
 .trustIcon {
   display: grid;
-  width: 24px;
-  height: 24px;
+  width: 27px;
+  height: 27px;
   place-items: center;
+  border: 1px solid rgb(255 255 255 / 22%);
   border-radius: 50%;
-  background: rgb(255 255 255 / 14%);
-  color: #d5eee9;
-  font-weight: 800;
+  background: rgb(255 255 255 / 12%);
+  color: #d8eee8;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .formPanel {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   justify-content: center;
-  padding: 56px clamp(32px, 6vw, 72px);
+  padding: clamp(34px, 6vw, 82px);
+}
+
+.formPanel > :not(.mobileBrand) {
+  width: 100%;
+  max-width: 440px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .mobileBrand {
@@ -159,8 +203,8 @@
 }
 
 .mobileBrand .brandMark {
-  border-color: #d5e8e4;
-  background: #e8f3f1;
+  border-color: #d5e8e2;
+  background: #eaf4f1;
   color: #176b67;
 }
 
@@ -169,66 +213,81 @@
 }
 
 .formHeading h2 {
-  margin: 10px 0 8px;
-  color: #24343b;
-  font-size: clamp(30px, 3vw, 36px);
-  font-weight: 680;
-  letter-spacing: -0.045em;
-  line-height: 1.15;
+  margin: 11px 0 9px;
+  color: #233b39;
+  font-size: clamp(30px, 3vw, 39px);
+  font-weight: 720;
+  letter-spacing: -0.05em;
+  line-height: 1.12;
 }
 
 .formHeading p {
+  max-width: 390px;
   margin: 0;
-  color: #5c6b72;
+  color: #647772;
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .form {
   display: grid;
+  width: 100%;
   gap: 19px;
 }
 
 .field {
   display: grid;
+  min-width: 0;
   gap: 8px;
 }
 
 .field label {
-  color: #34454b;
+  color: #344b46;
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 700;
 }
 
 .inputWrap {
   position: relative;
+  min-width: 0;
 }
 
 .input {
+  display: block;
   width: 100%;
-  min-height: 49px;
-  border: 1px solid #dce6e4;
-  border-radius: 9px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 15px;
+  border: 1px solid #d9e5e0;
+  border-radius: 12px;
   outline: none;
   background: #fff;
-  color: #24343b;
+  color: #233b39;
   font: inherit;
   font-size: 14px;
-  padding: 0 14px;
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 
 .input::placeholder {
-  color: #9aa8aa;
+  color: #9aa9a3;
+}
+
+.input:hover:not(:disabled) {
+  border-color: #b7cbc3;
 }
 
 .input:focus {
   border-color: #176b67;
-  box-shadow: 0 0 0 3px rgb(23 107 103 / 12%);
+  box-shadow: 0 0 0 4px rgb(23 107 103 / 11%);
+}
+
+.input:disabled {
+  background: #f6f8f7;
+  cursor: not-allowed;
 }
 
 .passwordInput {
-  padding-right: 52px;
+  padding-right: 66px;
 }
 
 .togglePassword {
@@ -236,85 +295,100 @@
   top: 50%;
   right: 7px;
   display: grid;
-  width: 36px;
-  height: 36px;
+  min-width: 46px;
+  min-height: 36px;
+  padding: 0 8px;
   transform: translateY(-50%);
   place-items: center;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   background: transparent;
-  color: #718187;
+  color: #657c74;
   cursor: pointer;
+  font: inherit;
   font-size: 12px;
+  font-weight: 700;
 }
 
-.togglePassword:hover {
-  background: #f2f7f6;
+.togglePassword:hover:not(:disabled) {
+  background: #edf5f2;
   color: #176b67;
 }
 
 .submitButton {
   display: flex;
-  min-height: 49px;
+  min-height: 53px;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 10px;
   margin-top: 3px;
+  padding: 0 18px;
   border: 0;
-  border-radius: 9px;
-  background: #176b67;
+  border-radius: 12px;
+  background: linear-gradient(100deg, #176b67, #135b56);
+  box-shadow: 0 9px 20px rgb(23 107 103 / 17%);
   color: #fff;
   cursor: pointer;
   font: inherit;
   font-size: 14px;
-  font-weight: 700;
-  transition: background 140ms ease, transform 140ms ease;
+  font-weight: 750;
+  transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
 }
 
 .submitButton:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #125754;
+  box-shadow: 0 13px 24px rgb(23 107 103 / 22%);
 }
 
 .submitButton:disabled {
   cursor: not-allowed;
-  opacity: 0.66;
+  opacity: 0.62;
 }
 
 .errorMessage {
   margin: 0;
-  padding: 11px 12px;
-  border: 1px solid #f0c8c5;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border: 1px solid #efcbc7;
+  border-radius: 11px;
   background: #fff7f6;
-  color: #9d2922;
+  color: #9d3029;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .registrationNote {
-  margin: 24px 0 0;
+  margin-top: 24px;
   padding-top: 18px;
-  border-top: 1px solid #edf1f0;
-  color: #78868b;
+  border-top: 1px solid #edf2ef;
+  color: #74837e;
   font-size: 12px;
-  line-height: 1.65;
+  line-height: 1.75;
+}
+
+.registrationNote p {
+  margin: 0 0 9px;
+}
+
+.registrationNote p:last-child {
+  margin-bottom: 0;
 }
 
 .homeLink {
   display: inline-flex;
   width: fit-content;
   align-items: center;
-  gap: 8px;
-  margin-top: 26px;
+  gap: 7px;
+  margin-top: 7px;
   color: #176b67;
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 700;
   text-decoration: none;
 }
 
-.homeLink:hover {
-  color: #125754;
+.homeLink:hover,
+.statusHomeLink:hover,
+.statusSecondaryLink:hover {
+  color: #0f504c;
   text-decoration: underline;
 }
 
@@ -322,96 +396,171 @@
   min-height: 100svh;
   display: grid;
   place-items: center;
-  padding: 24px;
-  background: #f5f8f7;
-  color: #24343b;
+  padding: clamp(18px, 4vw, 44px);
+  background:
+    radial-gradient(circle at 10% 15%, rgb(23 107 103 / 8%), transparent 28%),
+    #f3f7f5;
+  color: #233b39;
 }
 
 .statusCard {
-  width: min(100%, 620px);
-  padding: clamp(24px, 5vw, 42px);
-  border: 1px solid #e5eceb;
-  border-radius: 16px;
+  width: min(100%, 760px);
+  padding: clamp(26px, 5vw, 52px);
+  border: 1px solid #e0eae6;
+  border-radius: 26px;
   background: #fff;
-  box-shadow: 0 20px 60px rgb(36 52 59 / 7%);
+  box-shadow: 0 24px 70px rgb(25 58 53 / 10%);
+}
+
+.statusCard .mobileBrand {
+  display: inline-flex;
+  margin-bottom: 22px;
+  color: #176b67;
+}
+
+.statusCard .mobileBrand .brandMark {
+  border-color: #d5e8e2;
+  background: #eaf4f1;
+  color: #176b67;
 }
 
 .statusCard h1 {
-  margin: 28px 0 8px;
-  font-size: 32px;
-  letter-spacing: -0.04em;
+  margin: 13px 0 10px;
+  color: #233b39;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 720;
+  letter-spacing: -0.05em;
+  line-height: 1.15;
 }
 
 .statusIntro {
-  margin: 0 0 22px;
-  color: #5c6b72;
+  margin: 0 0 23px;
+  color: #647772;
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.8;
   overflow-wrap: anywhere;
 }
 
-.identityList {
+.statusNotice {
+  margin: 20px 0;
+  padding: 15px 16px;
+  border: 1px solid #dcebe5;
+  border-radius: 13px;
+  background: #f4faf7;
+  color: #536d63;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.destinationList {
   display: grid;
   gap: 12px;
-  margin: 22px 0;
+  margin: 25px 0;
 }
 
-.identityItem {
-  padding: 16px;
-  border: 1px solid #e5eceb;
-  border-radius: 10px;
-  background: #fbfdfc;
+.destinationCard {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 19px;
+  border: 1px solid #dfeae5;
+  border-radius: 15px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
 }
 
-.identityItem h2 {
-  margin: 0 0 5px;
-  color: #176b67;
+.destinationCard:hover {
+  transform: translateY(-1px);
+  border-color: #9ec6b9;
+  background: #f8fcfa;
+  box-shadow: 0 9px 22px rgb(29 86 74 / 7%);
+}
+
+.destinationCard:focus-visible,
+.homeLink:focus-visible,
+.statusHomeLink:focus-visible,
+.statusSecondaryLink:focus-visible {
+  outline: 3px solid rgb(23 107 103 / 28%);
+  outline-offset: 3px;
+}
+
+.destinationContent {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.destinationContent strong {
+  color: #20534d;
   font-size: 15px;
+  font-weight: 750;
 }
 
-.identityItem p {
-  margin: 0;
-  color: #5c6b72;
-  font-size: 13px;
-  line-height: 1.65;
+.destinationContent > span {
+  color: #74837e;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.destinationArrow {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: #eaf4f0;
+  color: #176b67;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .statusActions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
-  margin-top: 26px;
+  gap: 13px 18px;
+  margin-top: 27px;
+  padding-top: 21px;
+  border-top: 1px solid #edf2ef;
 }
 
+.statusSecondaryLink,
 .statusHomeLink {
   color: #176b67;
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 700;
   text-decoration: none;
 }
 
 .signOutButton {
   min-height: 42px;
   padding: 0 16px;
-  border: 1px solid #dce6e4;
-  border-radius: 8px;
+  border: 1px solid #dce6e1;
+  border-radius: 10px;
   background: #fff;
-  color: #34454b;
+  color: #465c55;
   cursor: pointer;
   font: inherit;
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 700;
+  transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
 }
 
 .signOutButton:hover {
   border-color: #176b67;
+  background: #f5faf7;
   color: #176b67;
 }
 
 @media (max-width: 760px) {
   .page {
     min-height: 100svh;
+    display: block;
     padding: 0;
     background: #fff;
   }
@@ -419,64 +568,93 @@
   .layout {
     width: 100%;
     min-height: 100svh;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     border: 0;
     border-radius: 0;
     box-shadow: none;
   }
 
   .brandPanel {
-    min-height: 190px;
-    padding: 24px;
+    min-height: 215px;
+    padding: 25px 25px 28px;
+  }
+
+  .brandPanel > .brand {
+    display: inline-flex;
   }
 
   .brandPanel .brandCopy {
-    margin: 24px 0 0;
+    margin: 25px 0 0;
   }
 
   .brandCopy h1 {
-    max-width: 400px;
-    margin: 9px 0 6px;
-    font-size: 27px;
+    max-width: 440px;
+    margin: 9px 0 7px;
+    font-size: clamp(28px, 7vw, 36px);
   }
 
   .brandCopy p,
-  .trustNote,
-  .brandPanel > .brand {
+  .trustNote {
     display: none;
   }
 
   .brandCopy .eyebrow {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .formPanel {
-    padding: 30px 24px 34px;
+    width: 100%;
+    padding: 31px 25px 38px;
+  }
+
+  .formPanel > :not(.mobileBrand) {
+    max-width: 520px;
   }
 
   .mobileBrand {
-    display: inline-flex;
-    margin-bottom: 30px;
+    display: none;
   }
 
   .formHeading {
-    margin-bottom: 24px;
+    margin-bottom: 25px;
+  }
+
+  .formHeading h2 {
+    font-size: 31px;
+  }
+
+  .statusPage {
+    min-height: 100svh;
+    padding: 18px;
+  }
+
+  .statusCard {
+    padding: 25px 21px;
+    border-radius: 20px;
   }
 }
 
 @media (max-width: 380px) {
   .brandPanel {
-    min-height: 170px;
-    padding: 20px;
+    min-height: 198px;
+    padding: 21px 20px 24px;
   }
 
   .formPanel {
-    padding: 25px 20px 30px;
+    padding: 26px 20px 32px;
+  }
+
+  .statusActions {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
-.statusCard .mobileBrand {
-  display: inline-flex;
-  margin-bottom: 26px;
-  color: #176b67;
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .submitButton,
+  .destinationCard,
+  .signOutButton {
+    transition: none;
+  }
 }

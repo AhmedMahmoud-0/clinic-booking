@@ -1,0 +1,26 @@
+MERUNO Update 76 — Patient Records, Billing, Complaints & Notifications
+
+Delivered:
+- Protected /portal/records page for completed encounters, issued prescriptions, released lab results, and released radiology reports.
+- Protected /portal/billing page for issued invoices, completed payments/receipt records, and refund history.
+- Patient complaint submission with strict validation, patient-owned optional appointment/invoice links, server-generated reference, and initial complaint event recorded atomically.
+- Patient in-app notifications list and owner-scoped mark-as-read operation.
+- Responsive portal navigation links for the new areas.
+- Unit validation tests, anonymous-access E2E tests, file guide, apply guide, and implementation notes.
+
+Security:
+- Every new endpoint uses the existing verified patient portal authorization guard.
+- Patient identity always comes from the server actor, never the client body/query.
+- These endpoints expose the signed-in patient's own records only; they do not implement delegated family-record access. No family data is exposed without a later exact-scope `requirePatientRecordAccess()` flow.
+- Only released/issued/completed/paid records allowed by the domain lifecycle are shown.
+- No raw Prisma objects, patient identifiers, staff notes, or internal complaint events are exposed.
+
+No schema, migration, seed, generated-client, package, lockfile, dependency, environment, or existing domain-workflow changes.
+
+Not included because no approved patient-facing contract existed in inspected archives:
+- Patient data-copy/correction request workflow.
+- Patient-authorized clinical attachment downloads.
+- New notification production or email/SMS/WhatsApp/browser-push delivery.
+- Online payment and patient-side refund execution.
+
+Status: delivered for local verification. Update 76 and Phase 10 remain open until local typecheck, lint, unit, E2E, and production-build results are confirmed.

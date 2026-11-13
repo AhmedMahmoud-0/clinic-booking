@@ -1,0 +1,6 @@
+MERUNO Update 73 Fix 01 — Homepage Route Alignment
+
+Fixes the homepage being served from the original root route rather than the new (public) route group.
+Replaces src/app/page.tsx with the designed Update 73 homepage wrapped in PublicSiteLayout.
+Requires deleting src/app/(public)/page.tsx (only this file) after applying.
+No database, migration, dependency, or environment changes.

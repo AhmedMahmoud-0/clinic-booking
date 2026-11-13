@@ -1,25 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SignInForm } from "../../components/auth/sign-in-form";
-import styles from "./login.module.css";
+import { AuthPageLayout } from "../../components/auth/auth-page-layout";
 
-export const metadata: Metadata = { title: "Sign in | MERUNO Medical Clinics", description: "Sign in to your MERUNO account." };
+export const metadata: Metadata = {
+  title: "Sign in | MERUNO Medical Clinics",
+  description: "Sign in securely to your MERUNO account.",
+};
 
 export default function LoginPage() {
   return (
-    <main className={styles.page}><div className={styles.layout}>
-      <section className={styles.brandPanel} aria-label="MERUNO Medical Clinics">
-        <Link className={styles.brand} href="/" aria-label="MERUNO home"><span className={styles.brandMark} aria-hidden="true">M</span><span><strong>MERUNO</strong><small>MEDICAL CLINICS</small></span></Link>
-        <div className={styles.brandCopy}><span className={styles.eyebrow}>CARE, CLEARLY.</span><h1>Your health journey, in one place.</h1><p>Secure access to your clinic account, appointments, and the services available to your verified identity.</p></div>
-        <div className={styles.trustNote}><span className={styles.trustIcon} aria-hidden="true">✓</span><span>Private account access</span></div>
-      </section>
-      <section className={styles.formPanel}>
-        <div className={styles.mobileBrand}><span className={styles.brandMark} aria-hidden="true">M</span><span><strong>MERUNO</strong><small>MEDICAL CLINICS</small></span></div>
-        <div className={styles.formHeading}><span className={styles.eyebrow}>ACCOUNT ACCESS</span><h2>Welcome back</h2><p>Sign in with the verified email address linked to your MERUNO account.</p></div>
-        <SignInForm />
-        <div className={styles.registrationNote}><p><Link className={styles.homeLink} href="/forgot-password">Forgot password?</Link></p><p>New patient? <Link className={styles.homeLink} href="/register">Create a patient sign-in account</Link></p><p>Account creation does not automatically link a medical record. The clinic verifies and links patient records separately.</p></div>
-        <Link className={styles.homeLink} href="/"><span aria-hidden="true">←</span> Back to MERUNO website</Link>
-      </section>
-    </div></main>
+    <AuthPageLayout
+      eyebrow="ACCOUNT ACCESS"
+      title="Welcome back"
+      description="Sign in with the verified email address linked to your MERUNO account. Your available workspace will open after your account is checked."
+    >
+      <SignInForm />
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm">
+        <Link href="/forgot-password" className="font-semibold text-[#176B67] hover:text-[#0F504C] hover:underline">Forgot password?</Link>
+        <span className="text-[#75847E]">New patient? <Link href="/register" className="font-bold text-[#176B67] hover:text-[#0F504C] hover:underline">Create an account</Link></span>
+      </div>
+      <div className="mt-5 rounded-2xl border border-[#E2ECE7] bg-[#F6FAF8] px-4 py-3.5 text-xs leading-6 text-[#647772]">
+        Creating a sign-in account does not automatically create or link a medical record. The clinic verifies and links existing patient records separately.
+      </div>
+    </AuthPageLayout>
   );
 }

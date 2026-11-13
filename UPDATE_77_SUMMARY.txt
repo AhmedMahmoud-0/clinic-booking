@@ -1,0 +1,13 @@
+MERUNO Update 77 — Phase 11 Clinic Manager Foundation
+
+Delivered:
+- Protected Clinic Manager workspace shell, navigation, and responsive layout.
+- Cairo-local operations dashboard using aggregate-only counts.
+- Staff oversight using employment status and active role assignments.
+- Separate operation-report and staff-oversight permission gates.
+- Unit and Playwright tests.
+- File guide, apply guide, and technical notes.
+
+No Prisma schema, migration, dependency, auth model, or existing business workflow was changed.
+
+Verification: package content and syntax are inspected locally. The user's current repository, generated Prisma client, package scripts, and local database are not mounted in this build environment. Therefore, typecheck, lint, Vitest, Playwright, and production build must be confirmed locally using APPLY_UPDATE_77.md.

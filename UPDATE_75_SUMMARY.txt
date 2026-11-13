@@ -1,0 +1,16 @@
+MERUNO Update 75 — Patient Portal Foundation, Account Area, and Appointment Self-Service
+
+Delivered:
+- Protected /portal shell and responsive navigation.
+- Patient dashboard and authorized appointment summary.
+- Upcoming, past, and cancelled appointments with detail view.
+- Existing Phase 6 patient self-cancellation and rescheduling controls.
+- Completed visit-history list with minimal patient-facing data.
+- Own-profile read view, separate sign-in account email, and existing account-security entry.
+- Existing family delegation grants, permitted decisions, and revocation controls.
+- Anonymous page/API E2E protection.
+
+No schema, migration, dependency, or booking-policy changes.
+
+Apply instructions: APPLY_UPDATE_75.md
+File inventory: UPDATE_75_FILE_GUIDE.md

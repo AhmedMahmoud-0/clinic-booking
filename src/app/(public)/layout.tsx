@@ -1,12 +1,7 @@
-import { PublicFooter } from "@/components/layout/public-footer";
-import { PublicHeader } from "@/components/layout/public-header";
+import type { ReactNode } from "react";
 
-export default function PublicLayout({ children }: LayoutProps<"/">) {
-  return (
-    <div className="flex flex-1 flex-col">
-      <PublicHeader />
-      {children}
-      <PublicFooter />
-    </div>
-  );
+import { PublicSiteLayout } from "@/components/public-site/public-site-layout";
+
+export default function PublicLayout({ children }: { children: ReactNode }) {
+  return <PublicSiteLayout>{children}</PublicSiteLayout>;
 }

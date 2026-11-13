@@ -1,0 +1,30 @@
+MERUNO — Phase 11 / Update 78
+Manager Operations
+
+Delivered:
+- Manager complaint queue, explicit status transitions, ComplaintEvent history, and AuditLog entries.
+- Reception phone/in-person complaint intake protected by `complaint.intake`; reference number and receiving employee are assigned server-side, with a first `RECEIVED` event and audit entry in the same Serializable transaction.
+- Confidential incident intake/register and audited status transitions using the existing IncidentReport and AuditLog models.
+- Aggregate operational reports for appointment states, completed visits, new patients, cancellations, no-shows, complaint/incident status, doctor visit counts, visits by primary specialty, queue wait time, laboratory turnaround, radiology turnaround, and pending diagnostic review backlog.
+- Reused Phase 9B discount/refund approval and financial report workbenches through Clinic Manager routes.
+- Extended Clinic Manager navigation and added focused unit/E2E tests.
+
+Security:
+- Existing operation-specific employee permissions are required.
+- Mutations enforce same-origin JSON requests and server-derived employee identity.
+- Complaint/incident workflows use strict input schemas; caller-selected owner/status IDs are rejected.
+- Reception can only record PHONE/IN_PERSON complaints; its form cannot set patient/encounter/invoice IDs, complaint status, reference number, or recorder identity. Optional submitter contact details are visible only inside the manager complaint worklist.
+- Incident intake does not accept patient or encounter IDs and avoids patient-identifying/clinical text in the manager intake form.
+- Aggregate operational reports do not return patient names or clinical content.
+- No-store response headers are used.
+
+Database / dependencies:
+- No Prisma schema changes.
+- No migrations or seed changes.
+- No package/dependency or lockfile changes.
+
+Validation performed by package author:
+- TypeScript/TSX syntax transpilation check: 23 files parsed, 0 syntax diagnostics.
+- Actual project typecheck, ESLint, Vitest, Playwright, and production build have not been run against the user's local repository.
+
+Next local checks are listed in APPLY_UPDATE_78.md. Update 78 remains pending local verification until the user supplies those results.

@@ -1,0 +1,8 @@
+MERUNO Update 75 — Fix 01
+
+Repairs:
+- ESLint react-hooks/set-state-in-effect in appointment-detail-view.tsx.
+- ESLint react-hooks/set-state-in-effect in family-access-view.tsx.
+- Patient portal E2E expectation to recognize both anonymous sign-in redirects and authenticated-but-unlinked patient denial.
+
+Three replacement files only. No API, auth policy, DB, dependency, or business-rule changes.

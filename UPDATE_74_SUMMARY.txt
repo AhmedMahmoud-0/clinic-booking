@@ -1,0 +1,9 @@
+MERUNO Update 74 — Phase 10: Specialty & Doctor Discovery, Public Information Pages, and Booking UI
+
+Added active-catalog specialty and doctor directories/profiles; search and specialty filtering; FAQ, Contact, Privacy, Terms, and 404 pages; responsive navigation with a Book Appointment CTA; and a five-step booking flow using existing availability, authenticated booking, and guest booking APIs.
+
+Added GET /api/patient/booking-context. It returns only the current patient's own profile and patients with an active, exact BOOK_APPOINTMENTS delegation, checked with the existing booking authorization policy. It returns no medical data.
+
+No database schema, migration, seed, package, dependency, or environment changes.
+
+Local repository typecheck, lint, complete Vitest, focused Playwright, and production build are pending developer verification.

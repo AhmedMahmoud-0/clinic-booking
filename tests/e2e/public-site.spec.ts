@@ -8,10 +8,10 @@ test("public homepage renders the MERUNO introduction and demo notice", async ({
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "A calmer way to run an outpatient clinic.",
+      name: "A clearer path to outpatient care.",
     }),
   ).toBeVisible();
-  await expect(page.getByText(/This is a portfolio demo/i)).toBeVisible();
+  await expect(page.getByText(/portfolio demonstration using synthetic data/i)).toBeVisible();
   await expect(page.getByRole("link", { name: "Skip to main content" })).toHaveAttribute(
     "href",
     "#main-content",
@@ -19,24 +19,51 @@ test("public homepage renders the MERUNO introduction and demo notice", async ({
 
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+  await expect(page.getByRole("link", { name: "Patient portal" }).first()).toHaveAttribute(
+    "href",
+    "/login",
+  );
 });
 
-test("public homepage has no horizontal overflow on narrow mobile widths", async ({
+test("public navigation opens the About and Services pages", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "About", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: /A focused clinic model, brought into one digital experience/i,
+    }),
+  ).toBeVisible();
+
+  await page.getByRole("link", { name: "Services", exact: true }).first().click();
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: /The services included in the MERUNO clinic model/i,
+    }),
+  ).toBeVisible();
+  await expect(page.getByText("Digital X-ray", { exact: true })).toBeVisible();
+  await expect(page.getByText("Ultrasound", { exact: true })).toBeVisible();
+});
+
+test("public pages have no horizontal overflow on narrow mobile widths", async ({
   page,
 }) => {
-  for (const width of [320, 360, 390]) {
-    await page.setViewportSize({ width, height: 800 });
-    await page.goto("/");
+  for (const route of ["/", "/about", "/services"]) {
+    for (const width of [320, 360, 390]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(route);
 
-    const dimensions = await page.evaluate(() => ({
-      documentWidth: document.documentElement.scrollWidth,
-      viewportWidth: document.documentElement.clientWidth,
-    }));
+      const dimensions = await page.evaluate(() => ({
+        documentWidth: document.documentElement.scrollWidth,
+        viewportWidth: document.documentElement.clientWidth,
+      }));
 
-    expect(
-      dimensions.documentWidth,
-      `Unexpected horizontal overflow at ${width}px viewport width`,
-    ).toBeLessThanOrEqual(dimensions.viewportWidth);
+      expect(
+        dimensions.documentWidth,
+        `Unexpected horizontal overflow at ${width}px viewport width on ${route}`,
+      ).toBeLessThanOrEqual(dimensions.viewportWidth);
+    }
   }
 });
 

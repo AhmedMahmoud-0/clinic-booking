@@ -1,0 +1,8 @@
+MERUNO Update 75 — Fix 02
+
+Scope: Correct the patient portal Playwright test to match the observed anonymous-session behavior and wait for Next.js streamed redirects to complete.
+
+Changed file:
+- tests/e2e/patient-portal.spec.ts
+
+No application source, authorization behavior, API, database, migration, package, or environment changes.
