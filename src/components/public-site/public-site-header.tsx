@@ -66,30 +66,46 @@ function NavigationLinks({ mobile = false }: { mobile?: boolean }) {
 export function PublicSiteHeader() {
   return (
     <header className="relative z-40 w-full min-w-0 border-b border-[#E8EEED] bg-white/95 backdrop-blur">
+      <style>{`
+        @media (max-width: 1279px) {
+          .meruno-public-desktop-navigation,
+          .meruno-public-desktop-actions {
+            display: none !important;
+          }
+          .meruno-public-mobile-navigation {
+            display: block !important;
+          }
+        }
+        @media (min-width: 1280px) {
+          .meruno-public-mobile-navigation {
+            display: none !important;
+          }
+        }
+      `}</style>
       <div className="mx-auto flex min-h-[82px] w-full min-w-0 max-w-7xl items-center justify-between gap-4 px-5 sm:px-7 lg:px-8">
         <Brand />
 
-        <nav aria-label="Main navigation" className="hidden min-w-0 items-center gap-0.5 xl:flex">
+        <nav aria-label="Main navigation" className="meruno-public-desktop-navigation hidden min-w-0 items-center gap-0.5 xl:flex">
           <NavigationLinks />
         </nav>
 
-        <div className="hidden shrink-0 items-center gap-2 xl:flex">
+        <div className="meruno-public-desktop-actions hidden shrink-0 items-center gap-2 xl:flex">
           <Link
             href="/login"
-            className="whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-medium text-[#526563] transition hover:bg-[#F1F7F5] hover:text-[#176B67]"
+            className="hidden whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-medium text-[#526563] transition hover:bg-[#F1F7F5] hover:text-[#176B67] xl:inline-flex"
           >
             Sign in
           </Link>
           <Link
             href="/book-appointment"
-            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-[#176B67] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#125A56] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B67]"
+            className="hidden min-h-11 shrink-0 items-center gap-2 rounded-full bg-[#176B67] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#125A56] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B67] xl:inline-flex"
           >
             Book appointment
             <PublicIcon name="arrow" size={16} />
           </Link>
         </div>
 
-        <details className="group relative shrink-0 xl:hidden">
+        <details className="meruno-public-mobile-navigation group relative shrink-0 xl:hidden">
           <summary className="flex size-11 cursor-pointer list-none items-center justify-center rounded-xl border border-[#E1EAE7] text-[#24413F] transition hover:bg-[#F5F8F7] [&::-webkit-details-marker]:hidden">
             <span className="sr-only">Open navigation menu</span>
             <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">

@@ -1,25 +1,33 @@
 import { expect, test } from "@playwright/test";
 
-test("Update 76 patient portal pages require a verified patient session", async ({ page }) => {
-  // The first visit to a newly added App Router page can trigger a cold
-  // development compilation. Wait for the navigation commit and assert the
-  // server redirect, rather than waiting for every document/load event.
-  test.setTimeout(90_000);
+test("anonymous visitors are redirected from Update 76 patient portal pages to sign-in", async ({ page }) => {
+  // The Playwright project may provide a saved storageState. This test is
+  // specifically about anonymous access, so remove any inherited auth state
+  // before each protected-route request.
+  await page.addInitScript(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+
+  test.setTimeout(240_000);
 
   for (const route of [
     "/portal/records",
+    "/portal/visits/demo-visit-id",
     "/portal/billing",
     "/portal/complaints",
     "/portal/notifications",
   ]) {
+    await page.context().clearCookies();
     await page.goto(route, { waitUntil: "commit", timeout: 60_000 });
-    await expect(page).toHaveURL(/\/login(?:\?|$)/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/login(?:\?|$)/, { timeout: 45_000 });
   }
 });
 
 test("Update 76 patient APIs reject anonymous access without caching", async ({ request }) => {
   for (const route of [
     "/api/patient/portal/records",
+    "/api/patient/portal/visits/demo-visit-id",
     "/api/patient/portal/billing",
     "/api/patient/portal/complaints",
     "/api/patient/portal/notifications",

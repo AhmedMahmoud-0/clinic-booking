@@ -76,8 +76,9 @@ export function ProfileView() {
       </section>
 
       <section className="rounded-2xl border border-[#E8E7D9] bg-[#FFFCF2] p-5">
-        <h2 className="font-semibold text-[#766640]">Need to correct patient details?</h2>
-        <p className="mt-2 text-sm leading-6 text-[#887B5C]">Online editing of clinic demographic and contact details is not enabled for patient accounts in the current project. Contact Reception to request a correction. Account password and security controls remain available separately.</p>
+        <h2 className="font-semibold text-[#766640]">Patient data access and correction requests</h2>
+        <p className="mt-2 text-sm leading-6 text-[#887B5C]">This portfolio demonstration does not yet include a dedicated, trackable workflow for requesting a copy of patient data or correcting clinic demographic details. No request can be submitted or tracked from this page. The public contact page is also a non-connected demo page; do not send personal or medical information through it.</p>
+        <p className="mt-2 text-sm leading-6 text-[#887B5C]">Account password and security controls remain available separately. A live implementation requires an approved administrative request process with its own protected records and audit trail.</p>
       </section>
     </div>
   );

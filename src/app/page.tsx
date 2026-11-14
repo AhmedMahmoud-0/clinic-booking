@@ -43,20 +43,20 @@ export default async function HomePage() {
 
   return (
     <PublicSiteLayout>
-      <main id="main-content">
-      <section className="relative isolate overflow-hidden bg-[#F5F8F7]">
+      <main id="main-content" className="w-full min-w-0 max-w-full overflow-x-hidden">
+      <section className="relative isolate w-full min-w-0 overflow-hidden bg-[#F5F8F7]">
         <div className="pointer-events-none absolute -right-40 -top-40 -z-10 size-[34rem] rounded-full bg-[#DDEDEA] blur-3xl" />
         <div className="pointer-events-none absolute -bottom-44 left-[-10rem] -z-10 size-[28rem] rounded-full bg-white blur-3xl" />
 
-        <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 pb-16 pt-14 sm:px-7 sm:pb-20 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-8 lg:pb-24 lg:pt-20">
-          <div className="max-w-2xl">
+        <div className="mx-auto grid w-full min-w-0 max-w-7xl items-center gap-12 px-5 pb-16 pt-14 sm:px-7 sm:pb-20 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-8 lg:pb-24 lg:pt-20">
+          <div className="min-w-0 max-w-2xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#CFE0DC] bg-white/80 px-3.5 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.15em] text-[#41736D] shadow-sm">
               <span className="size-1.5 rounded-full bg-[#176B67]" />
               Multi-specialty outpatient clinic
             </span>
 
             <h1 className="mt-7 text-5xl font-semibold leading-[1.04] tracking-[-0.055em] text-[#243B3B] sm:text-6xl lg:text-[4.35rem]">
-              A clearer path to
+              A clearer path to{" "}
               <span className="block text-[#176B67]">outpatient care.</span>
             </h1>
 
@@ -98,7 +98,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[34rem] lg:mx-0 lg:justify-self-end">
+          <div className="relative mx-auto w-full min-w-0 max-w-[34rem] lg:mx-0 lg:justify-self-end">
             <div className="absolute -right-5 -top-6 size-28 rounded-[2rem] border border-[#C9DEDA] bg-[#E7F1EF] sm:-right-8 sm:-top-8 sm:size-36" />
             <div className="absolute -bottom-5 -left-5 size-24 rounded-full bg-[#B9D8D1]/50 blur-sm sm:-bottom-7 sm:-left-7 sm:size-32" />
 
@@ -198,7 +198,7 @@ export default async function HomePage() {
       </section>
 
       <section className="bg-white py-16 sm:py-20 lg:py-24">
-        <div className="mx-auto w-full max-w-7xl px-5 sm:px-7 lg:px-8">
+        <div className="mx-auto w-full min-w-0 max-w-7xl px-5 sm:px-7 lg:px-8">
           <SectionHeading
             eyebrow="Explore the clinic"
             title="Find the care area that fits your needs."
@@ -208,7 +208,7 @@ export default async function HomePage() {
           {catalog && specialties.length > 0 ? (
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {specialties.slice(0, 8).map((specialty, index) => (
-                <a
+                <Link
                   key={specialty.id}
                   href={`/specialties/${encodeURIComponent(specialty.id)}`}
                   data-testid="home-specialty-card"
@@ -229,7 +229,7 @@ export default async function HomePage() {
                     View specialty and doctors
                     <PublicIcon name="arrow" size={14} />
                   </span>
-                </a>
+                </Link>
               ))}
             </div>
           ) : (
@@ -267,7 +267,7 @@ export default async function HomePage() {
       </section>
 
       <section className="bg-[#F5F8F7] py-16 sm:py-20 lg:py-24" id="services">
-        <div className="mx-auto w-full max-w-7xl px-5 sm:px-7 lg:px-8">
+        <div className="mx-auto w-full min-w-0 max-w-7xl px-5 sm:px-7 lg:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <SectionHeading
               eyebrow="Within the clinic"

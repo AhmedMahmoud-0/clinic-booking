@@ -128,8 +128,8 @@ export function FamilyAccessView() {
     <div className="space-y-6">
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#71918A]">Family and permissions</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#243B3B]">Family & access</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-[#74857F]">Review the verified delegation requests and access grants that involve your patient identity.</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#243B3B]">Family members & access</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-[#74857F]">Review the verified family-access requests and delegation scopes linked to your patient identity.</p>
       </header>
       <section className="rounded-2xl border border-[#DCEAE5] bg-[#EDF6F2] p-5">
         <h2 className="font-semibold text-[#31534B]">Access is scope-specific</h2>
@@ -141,7 +141,7 @@ export function FamilyAccessView() {
       {!isLoading && !errorMessage && grants.length === 0 ? (
         <section className="rounded-2xl border border-[#E3ECE8] bg-white p-7">
           <h2 className="font-semibold text-[#334D47]">No delegation requests or access grants</h2>
-          <p className="mt-2 text-sm leading-6 text-[#7B8B85]">No active or pending delegation grants are currently linked to this patient identity. Family relationship records and new delegation setup are managed through the clinic’s verified process.</p>
+          <p className="mt-2 text-sm leading-6 text-[#7B8B85]">No active or pending delegation grants are currently linked to this patient identity. A family relationship alone does not create portal access; any additional relationship must be verified and recorded by the clinic before it appears here.</p>
         </section>
       ) : null}
       <div className="grid gap-4">

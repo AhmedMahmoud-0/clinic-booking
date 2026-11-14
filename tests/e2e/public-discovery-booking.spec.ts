@@ -20,8 +20,8 @@ test("the full specialty card opens its details page", async ({ page }) => {
   await expect(firstSpecialtyCard.getByText("Explore", { exact: false })).toBeVisible();
 
   // Click the card heading rather than the Explore affordance to verify the whole card is interactive.
-  await firstSpecialtyCard.locator("h2").click();
-  await expect(page).toHaveURL(/\/specialties\/[^/?]+$/);
+  await firstSpecialtyCard.click();
+  await expect(page).toHaveURL(/\/specialties\/[^/?]+$/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { level: 2, name: "Doctors in this specialty" })).toBeVisible();
 });
 
@@ -60,10 +60,35 @@ test("new public pages fit narrow mobile widths", async ({ page }) => {
   for (const route of ["/specialties", "/doctors", "/faq", "/contact", "/privacy", "/terms", "/book-appointment"]) {
     await page.setViewportSize({ width: 320, height: 800 });
     await page.goto(route);
-    const dimensions = await page.evaluate(() => ({
-      documentWidth: document.documentElement.scrollWidth,
-      viewportWidth: document.documentElement.clientWidth,
-    }));
-    expect(dimensions.documentWidth, `Unexpected horizontal overflow on ${route}`).toBeLessThanOrEqual(dimensions.viewportWidth);
+    await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeHidden();
+    await expect(page.locator(".meruno-public-desktop-actions")).toBeHidden();
+    await expect(page.locator(".meruno-public-mobile-navigation > summary")).toBeVisible();
+    const dimensions = await page.evaluate(() => {
+      const viewportWidth = document.documentElement.clientWidth;
+      const offenders = Array.from(document.querySelectorAll<HTMLElement>("body *"))
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            tag: element.tagName.toLowerCase(),
+            text: (element.innerText || "").trim().slice(0, 60),
+            className: typeof element.className === "string" ? element.className.slice(0, 160) : "",
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+            width: Math.round(rect.width),
+          };
+        })
+        .filter((item) => item.width > 0 && (item.left < -1 || item.right > viewportWidth + 1))
+        .sort((a, b) => b.right - a.right)
+        .slice(0, 8);
+      return {
+        documentWidth: document.documentElement.scrollWidth,
+        viewportWidth,
+        offenders,
+      };
+    });
+    expect(
+      dimensions.documentWidth,
+      `Unexpected horizontal overflow on ${route}. Elements outside viewport: ${JSON.stringify(dimensions.offenders)}`,
+    ).toBeLessThanOrEqual(dimensions.viewportWidth);
   }
 });

@@ -141,7 +141,17 @@ export async function getPatientAppointment(patientId: string, appointmentId: st
 export async function getPatientDashboard(patientId: string) {
   const prisma = getPrismaClient();
   const now = new Date();
-  const [patient, upcomingCount, completedVisitCount, cancelledCount, nextAppointments] = await Promise.all([
+  const [
+    patient,
+    upcomingCount,
+    completedVisitCount,
+    cancelledCount,
+    prescriptionCount,
+    releasedLabResultCount,
+    releasedRadiologyReportCount,
+    nextAppointments,
+    recentVisits,
+  ] = await Promise.all([
     prisma.patient.findFirst({
       where: { id: patientId, isActive: true },
       select: { firstName: true, preferredName: true, lastName: true },
@@ -149,11 +159,57 @@ export async function getPatientDashboard(patientId: string) {
     prisma.appointment.count({ where: { patientId, status: "CONFIRMED", startsAt: { gte: now } } }),
     prisma.encounter.count({ where: { patientId, status: "COMPLETED" } }),
     prisma.appointment.count({ where: { patientId, status: "CANCELLED" } }),
+    prisma.prescription.count({
+      where: { status: "ISSUED", issuedAt: { not: null }, encounter: { patientId, status: "COMPLETED" } },
+    }),
+    prisma.labResult.count({
+      where: {
+        status: "RELEASED",
+        releasedAt: { not: null },
+        orderItem: {
+          labOrder: {
+            OR: [
+              { encounter: { patientId, status: "COMPLETED" } },
+              { externalIntake: { patientId } },
+            ],
+          },
+        },
+      },
+    }),
+    prisma.radiologyReport.count({
+      where: {
+        status: "RELEASED",
+        releasedAt: { not: null },
+        exam: { orderItem: { radiologyOrder: { encounter: { patientId, status: "COMPLETED" } } } },
+      },
+    }),
     prisma.appointment.findMany({
       where: { patientId, status: "CONFIRMED", startsAt: { gte: now } },
       orderBy: { startsAt: "asc" },
       take: 3,
       select: appointmentSelect,
+    }),
+    prisma.encounter.findMany({
+      where: { patientId, status: "COMPLETED" },
+      orderBy: [{ completedAt: "desc" }, { startedAt: "desc" }],
+      take: 3,
+      select: {
+        id: true,
+        startedAt: true,
+        completedAt: true,
+        doctor: {
+          select: {
+            publicDisplayName: true,
+            professionalTitle: true,
+            employee: { select: { firstName: true, lastName: true } },
+            specialties: {
+              orderBy: { isPrimary: "desc" },
+              take: 1,
+              select: { specialty: { select: { name: true } } },
+            },
+          },
+        },
+      },
     }),
   ]);
 
@@ -165,8 +221,26 @@ export async function getPatientDashboard(patientId: string) {
       upcomingAppointments: upcomingCount,
       completedVisits: completedVisitCount,
       cancelledAppointments: cancelledCount,
+      issuedPrescriptions: prescriptionCount,
+      releasedLabResults: releasedLabResultCount,
+      releasedRadiologyReports: releasedRadiologyReportCount,
     },
     nextAppointments: nextAppointmentsDto,
+    recentVisits: recentVisits.map((record) => {
+      const doctor = record.doctor;
+      const name = doctor.publicDisplayName?.trim() ||
+        [doctor.employee.firstName, doctor.employee.lastName].filter(Boolean).join(" ") ||
+        "Medical doctor";
+      return {
+        id: record.id,
+        startedAt: record.startedAt.toISOString(),
+        completedAt: record.completedAt?.toISOString() ?? null,
+        doctor: {
+          name,
+          specialty: doctor.specialties[0]?.specialty.name ?? null,
+        },
+      };
+    }),
   };
 }
 
@@ -250,6 +324,10 @@ export async function getPatientVisitHistory(patientId: string) {
           },
         },
       },
+      diagnoses: {
+        orderBy: [{ isPrimary: "desc" }, { recordedAt: "asc" }],
+        select: { displayNameSnapshot: true, isPrimary: true },
+      },
     },
   });
 
@@ -263,6 +341,52 @@ export async function getPatientVisitHistory(patientId: string) {
       startedAt: record.startedAt.toISOString(),
       completedAt: record.completedAt?.toISOString() ?? null,
       doctor: { name, professionalTitle: doctor.professionalTitle, specialty: doctor.specialties[0]?.specialty.name ?? null },
+      diagnoses: record.diagnoses.map((diagnosis) => ({ name: diagnosis.displayNameSnapshot, isPrimary: diagnosis.isPrimary })),
     };
   });
+}
+
+export async function getPatientVisitDetails(patientId: string, visitId: string) {
+  const prisma = getPrismaClient();
+  const record = await prisma.encounter.findFirst({
+    where: { id: visitId, patientId, status: "COMPLETED" },
+    select: {
+      id: true,
+      startedAt: true,
+      completedAt: true,
+      doctor: {
+        select: {
+          publicDisplayName: true,
+          professionalTitle: true,
+          employee: { select: { firstName: true, lastName: true } },
+          specialties: {
+            orderBy: { isPrimary: "desc" },
+            take: 1,
+            select: { specialty: { select: { name: true } } },
+          },
+        },
+      },
+      diagnoses: {
+        orderBy: [{ isPrimary: "desc" }, { recordedAt: "asc" }],
+        select: { displayNameSnapshot: true, isPrimary: true },
+      },
+    },
+  });
+
+  if (!record) return null;
+  const doctor = record.doctor;
+  const name = doctor.publicDisplayName?.trim() ||
+    [doctor.employee.firstName, doctor.employee.lastName].filter(Boolean).join(" ") ||
+    "Medical doctor";
+  return {
+    id: record.id,
+    startedAt: record.startedAt.toISOString(),
+    completedAt: record.completedAt?.toISOString() ?? null,
+    doctor: {
+      name,
+      professionalTitle: doctor.professionalTitle,
+      specialty: doctor.specialties[0]?.specialty.name ?? null,
+    },
+    diagnoses: record.diagnoses.map((diagnosis) => ({ name: diagnosis.displayNameSnapshot, isPrimary: diagnosis.isPrimary })),
+  };
 }
